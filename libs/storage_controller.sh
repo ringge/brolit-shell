@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.1.7
+# Version: 3.2-alpha1
 ################################################################################
 #
 # Storage Controller: Controller to upload and download backups.
@@ -12,12 +12,12 @@
 #
 # Important: Backup/Restore utils selection.
 #
-#   Backup Uploader: 
+#   Backup Uploader:
 #       Simple way to upload backup file to this cloud service.
 #
-#   Rclone: 
+#   Rclone:
 #       Good way to store backups on a SFTP Server and cloud services.
-#       Option to "sync" files. 
+#       Option to "sync" files.
 #       Read: https://forum.rclone.org/t/incremental-backups-and-efficiency-continued/10763
 #
 #   Duplicity:
@@ -38,7 +38,7 @@
 #   0 if it utils were installed, 1 on error.
 ################################################################################
 
-function sc_create_dir() {
+function storage_create_dir() {
 
     local remote_directory=$1
 
@@ -47,9 +47,9 @@ function sc_create_dir() {
         dropbox_create_dir "${remote_directory}"
 
     fi
-    if [[ ${RCLONE_ENABLE} == "true" ]]; then
+    if [[ ${BACKUP_LOCAL_STATUS} == "enabled" ]]; then
 
-        rclone_create_dir "${remote_directory}"
+        mkdir --force "${BACKUP_LOCAL_CONFIG_BACKUP_PATH}/${remote_directory}"
 
     fi
 
@@ -66,19 +66,32 @@ function sc_create_dir() {
 #   0 if it utils were installed, 1 on error.
 ################################################################################
 
-function sc_upload_backup() {
+function storage_upload_backup() {
 
     local file_to_upload=$1
     local remote_directory=$2
 
     if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" ]]; then
 
+        # TODO: check function "upload_backup_to_dropbox"
+
         dropbox_upload "${file_to_upload}" "${remote_directory}"
 
     fi
-    if [[ ${RCLONE_ENABLE} == "true" ]]; then
+    if [[ ${BACKUP_LOCAL_STATUS} == "enabled" ]]; then
 
-        rclone_upload "${file_to_upload}" "${remote_directory}"
+        # New folder
+        #mkdir --force "${remote_directory}/${backup_type}"
+
+        # New folder with $project_name
+        #mkdir --force "${remote_directory}/${backup_type}/${project_name}"
+
+        log_event "info" "Uploading backup to local storage..." "false"
+        log_event "debug" "Running:  rsync --recursive  \"${file_to_upload}\" \"${BACKUP_LOCAL_CONFIG_BACKUP_PATH}/${remote_directory}\"" "false"
+
+        rsync --recursive "${file_to_upload}" "${BACKUP_LOCAL_CONFIG_BACKUP_PATH}/${remote_directory}"
+
+        # TODO: check if files need to be compressed (maybe an option?).
 
     fi
 
@@ -95,7 +108,7 @@ function sc_upload_backup() {
 #   0 if it utils were installed, 1 on error.
 ################################################################################
 
-function sc_download_backup() {
+function storage_download_backup() {
 
     local file_to_download=$1
     local remote_directory=$2
@@ -108,6 +121,42 @@ function sc_download_backup() {
     if [[ ${RCLONE_ENABLE} == "true" ]]; then
 
         rclone_download "${file_to_download}" "${remote_directory}"
+
+    fi
+
+}
+
+################################################################################
+# Delete backup to configured storage (dropbox, sftp, etc)
+#
+# Arguments:
+#   $1 = {file_to_delete}
+#
+# Outputs:
+#   0 if it utils were installed, 1 on error.
+################################################################################
+
+function storage_delete_backup() {
+
+    local file_to_delete=$1
+
+    if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" ]]; then
+
+        # TODO: check function "upload_backup_to_dropbox"
+
+        dropbox_delete "${file_to_delete}"
+
+    fi
+    #if [[ ${RCLONE_ENABLE} == "true" ]]; then
+    #
+    #    rclone_upload "${file_to_upload}" "${remote_directory}"
+    #
+    #fi
+    if [[ ${BACKUP_LOCAL_STATUS} == "enabled" ]]; then
+
+        rm --recursive --force "${file_to_delete}"
+
+        # TODO: check if files need to be compressed (maybe an option?).
 
     fi
 

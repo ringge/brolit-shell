@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.1.7
+# Version: 3.2-alpha1
 ################################################################################
 #
 # Server Config Manager: Brolit server configuration management.
@@ -74,7 +74,7 @@ function _brolit_configuration_load_server_config() {
 #   nothing
 ################################################################################
 
-function _brolit_configuration_load_sftp() {
+function _brolit_configuration_load_backup_sftp() {
 
     local server_config_file=$1
 
@@ -118,7 +118,7 @@ function _brolit_configuration_load_sftp() {
 #   nothing
 ################################################################################
 
-function _brolit_configuration_load_dropbox() {
+function _brolit_configuration_load_backup_dropbox() {
 
     local server_config_file=$1
 
@@ -174,7 +174,7 @@ function _brolit_configuration_load_dropbox() {
 #   nothing
 ################################################################################
 
-function _brolit_configuration_load_local() {
+function _brolit_configuration_load_backup_local() {
 
     local server_config_file=$1
 
@@ -208,7 +208,7 @@ function _brolit_configuration_load_local() {
 #   nothing
 ################################################################################
 
-function _brolit_configuration_load_duplicity() {
+function _brolit_configuration_load_backup_duplicity() {
 
     local server_config_file=$1
 
@@ -272,21 +272,21 @@ function _brolit_configuration_load_backup_retention() {
     declare -g BACKUP_RETENTION_KEEP_MONTHLY
 
     ## retention
-    BACKUP_RETENTION_KEEP_DAILY="$(json_read_field "${server_config_file}" "BACKUPS.retention[].keep_daily")"
+    BACKUP_RETENTION_KEEP_DAILY="$(json_read_field "${server_config_file}" "BACKUPS.config[].retention[].keep_daily")"
 
     if [ -z "${BACKUP_RETENTION_KEEP_DAILY}" ]; then
         log_event "error" "Missing required config vars for backup retention" "true"
         exit 1
     fi
 
-    BACKUP_RETENTION_KEEP_WEEKLY="$(json_read_field "${server_config_file}" "BACKUPS.retention[].keep_weekly")"
+    BACKUP_RETENTION_KEEP_WEEKLY="$(json_read_field "${server_config_file}" "BACKUPS.config[].retention[].keep_weekly")"
 
     if [ -z "${BACKUP_RETENTION_KEEP_WEEKLY}" ]; then
         log_event "error" "Missing required config vars for backup retention" "true"
         exit 1
     fi
 
-    BACKUP_RETENTION_KEEP_MONTHLY="$(json_read_field "${server_config_file}" "BACKUPS.retention[].keep_monthly")"
+    BACKUP_RETENTION_KEEP_MONTHLY="$(json_read_field "${server_config_file}" "BACKUPS.config[].retention[].keep_monthly")"
 
     if [ -z "${BACKUP_RETENTION_KEEP_MONTHLY}" ]; then
         log_event "error" "Missing required config vars for backup retention" "true"
@@ -1296,16 +1296,16 @@ function brolit_configuration_load() {
     ## BACKUPS methods
 
     #### dropbox
-    _brolit_configuration_load_dropbox "${server_config_file}"
+    _brolit_configuration_load_backup_dropbox "${server_config_file}"
 
     #### sftp
-    _brolit_configuration_load_sftp "${server_config_file}"
+    _brolit_configuration_load_backup_sftp "${server_config_file}"
 
     #### local
-    _brolit_configuration_load_local "${server_config_file}"
+    _brolit_configuration_load_backup_local "${server_config_file}"
 
     #### duplicity
-    _brolit_configuration_load_duplicity "${server_config_file}"
+    _brolit_configuration_load_backup_duplicity "${server_config_file}"
 
     #### if all required vars are disabled, show error
     if [[ ${BACKUP_DROPBOX_STATUS} != "enabled" ]] && [[ ${BACKUP_SFTP_STATUS} != "enabled" ]] && [[ ${BACKUP_LOCAL_STATUS} != "enabled" ]]; then

@@ -2,7 +2,7 @@
     "BROLIT_SETUP": {
         "config": [
             {
-                "version": "3.6.3",
+                "version": "3.7.1",
                 "debug": "true",
                 "quiet": "false",
                 "skip_test": "true",
@@ -31,10 +31,19 @@
         "config_path": "/etc/brolit"
     },
     "BACKUPS": {
-        "directories": [
+        "config": [
             {
-                "dir_1": "/var/www",
-                "dir_2": ""
+                "projects": "enabled",
+                "databases": "enabled",
+                "server_cfg": "enabled",
+                "compression_type": "lbzip2",
+                "retention": [
+                    {
+                        "keep_daily": "7",
+                        "keep_weekly": "0",
+                        "keep_monthly": "0"
+                    }
+                ]
             }
         ],
         "methods": [
@@ -78,20 +87,13 @@
                         "status": "disabled",
                         "config": [
                             {
-                                "backup_destination_path": "",
+                                "backup_path": "",
                                 "backup_frequency": "7D",
                                 "backup_full_life": "14D"
                             }
                         ]
                     }
                 ]
-            }
-        ],
-        "retention": [
-            {
-                "keep_daily": "7",
-                "keep_weekly": "0",
-                "keep_monthly": "0"
             }
         ]
     },

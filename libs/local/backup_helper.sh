@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.1.7
+# Version: 3.2-alpha1
 #############################################################################
 #
 # Backup Helper: Perform backup actions.
@@ -88,22 +88,27 @@ function make_server_files_backup() {
     if [[ ${compress_result} -eq 0 ]]; then
 
       # New folder with $VPSNAME
-      dropbox_create_dir "${VPSNAME}"
+      storage_create_dir "${VPSNAME}"
+      #dropbox_create_dir "${VPSNAME}"
 
       # New folder with $bk_type
-      dropbox_create_dir "${VPSNAME}/${bk_type}"
+      storage_create_dir "${VPSNAME}/${bk_type}"
+      #dropbox_create_dir "${VPSNAME}/${bk_type}"
 
       # New folder with $bk_sup_type (php, nginx, mysql)
-      dropbox_create_dir "${VPSNAME}/${bk_type}/${bk_sup_type}"
+      storage_create_dir "${VPSNAME}/${bk_type}/${bk_sup_type}"
+      #dropbox_create_dir "${VPSNAME}/${bk_type}/${bk_sup_type}"
 
-      # Dropbox Path
-      dropbox_path="${VPSNAME}/${bk_type}/${bk_sup_type}"
+      # Remote Path
+      remote_path="${VPSNAME}/${bk_type}/${bk_sup_type}"
 
       # Uploading backup files
-      dropbox_upload "${TMP_DIR}/${NOW}/${backup_file}" "${DROPBOX_FOLDER}/${dropbox_path}"
+      storage_upload_backup "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
+      #dropbox_upload "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
       # Deleting old backup files
-      dropbox_delete "${DROPBOX_FOLDER}/${dropbox_path}/${old_bk_file}"
+      storage_delete_backup "${remote_path}/${old_bk_file}"
+      #dropbox_delete "${remote_path}/${old_bk_file}"
 
       # Return
       echo "${backup_file_size}"
@@ -215,10 +220,10 @@ function make_mailcow_backup() {
         display --indent 6 --text "- Uploading backup file to Dropbox"
 
         # Upload new backup
-        dropbox_upload "${MAILCOW_TMP_BK}/${backup_file}" "${DROPBOX_FOLDER}/${dropbox_path}"
+        dropbox_upload "${MAILCOW_TMP_BK}/${backup_file}" "${dropbox_path}"
 
         # Remove old backup
-        dropbox_delete "${DROPBOX_FOLDER}/${dropbox_path}/${old_bk_file}"
+        dropbox_delete "${dropbox_path}/${old_bk_file}"
 
         # Remove old backups from server
         rm --recursive --force "${MAILCOW_DIR}/${MAILCOW_BACKUP_LOCATION:?}"
@@ -488,43 +493,58 @@ function make_files_backup() {
 
   local dropbox_path
 
-  # Compress backup
-  backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${TMP_DIR}/${NOW}/${backup_file}")"
+  # New folder with $VPSNAME
+  storage_create_dir "${VPSNAME}"
+  #dropbox_create_dir "${VPSNAME}"
 
-  # Check test result
-  compress_result=$?
-  if [[ ${compress_result} -eq 0 ]]; then
+  # New folder with $bk_type
+  storage_create_dir "${VPSNAME}/${bk_type}"
+  #dropbox_create_dir "${VPSNAME}/${bk_type}"
 
-    # New folder with $VPSNAME
-    dropbox_create_dir "${VPSNAME}"
+  # New folder with $directory_to_backup (project folder)
+  storage_create_dir "${VPSNAME}/${bk_type}/${directory_to_backup}"
+  #dropbox_create_dir "${VPSNAME}/${bk_type}/${directory_to_backup}"
 
-    # New folder with $bk_type
-    dropbox_create_dir "${VPSNAME}/${bk_type}"
+  remote_path="${VPSNAME}/${bk_type}/${directory_to_backup}"
 
-    # New folder with $directory_to_backup (project folder)
-    dropbox_create_dir "${VPSNAME}/${bk_type}/${directory_to_backup}"
+  if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" || ${BACKUP_SFTP_STATUS} == "enabled" ]]; then
 
-    dropbox_path="${VPSNAME}/${bk_type}/${directory_to_backup}"
+    # Compress backup
+    backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${TMP_DIR}/${NOW}/${backup_file}")"
 
-    # Upload backup
-    dropbox_upload "${TMP_DIR}/${NOW}/${backup_file}" "${DROPBOX_FOLDER}/${dropbox_path}"
+    # Check test result
+    compress_result=$?
+    if [[ ${compress_result} -eq 0 ]]; then
 
-    # Delete old backup from Dropbox
-    dropbox_delete "${DROPBOX_FOLDER}/${dropbox_path}/${old_bk_file}"
+      # Upload backup
+      storage_upload_backup "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
+      #dropbox_upload "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
-    # Delete temp backup
-    rm --force "${TMP_DIR}/${NOW}/${backup_file}"
+      # Delete old backup from Dropbox
+      storage_delete_backup "${remote_path}/${old_bk_file}"
+      #dropbox_delete "${remote_path}/${old_bk_file}"
 
-    # Log
-    log_event "info" "Temp backup deleted from server" "false"
-    #display --indent 6 --text "- Deleting temp files" --result "DONE" --color GREEN
+      # Delete temp backup
+      rm --force "${TMP_DIR}/${NOW}/${backup_file}"
 
-    # Return
-    echo "${backup_file_size}"
+      # Log
+      log_event "info" "Temp backup deleted from server" "false"
+      #display --indent 6 --text "- Deleting temp files" --result "DONE" --color GREEN
 
-  else
+      # Return
+      echo "${backup_file_size}"
 
-    return 1
+    else
+
+      return 1
+
+    fi
+
+  fi
+
+  if [[ ${BACKUP_LOCAL_STATUS} == "enabled" ]]; then
+
+    storage_upload_backup "${bk_path}/${directory_to_backup}" "${remote_path}"
 
   fi
 
@@ -808,7 +828,7 @@ function upload_backup_to_dropbox() {
   dropbox_path="/${VPSNAME}/${backup_type}/${project_name}"
 
   # Upload to Dropbox
-  dropbox_upload "${backup_file}" "${DROPBOX_FOLDER}${dropbox_path}"
+  dropbox_upload "${backup_file}" "${dropbox_path}"
 
   dropbox_result=$?
   if [[ ${dropbox_result} -eq 0 ]]; then
@@ -817,7 +837,7 @@ function upload_backup_to_dropbox() {
     old_backup_file="${project_name}_${backup_type}_${DAYSAGO}.tar.bz2"
 
     # Delete
-    dropbox_delete "${DROPBOX_FOLDER}${dropbox_path}/${old_backup_file}"
+    dropbox_delete "${dropbox_path}/${old_backup_file}"
 
     log_event "info" "Deleting temp ${backup_type} backup ${old_backup_file} from server" "false"
 

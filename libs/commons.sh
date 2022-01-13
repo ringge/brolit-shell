@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.1.7
+# Version: 3.2-alpha1
 ################################################################################
 
 ################################################################################
@@ -54,7 +54,7 @@ function _setup_globals_and_options() {
 
   # Script
   declare -g SCRIPT_N="BROLIT SHELL"
-  declare -g SCRIPT_V="3.1.7"
+  declare -g SCRIPT_V="3.2-alpha1"
 
   # Hostname
   declare -g VPSNAME="$HOSTNAME"
@@ -105,9 +105,6 @@ function _setup_globals_and_options() {
   # Main partition
   declare -g MAIN_VOL
   MAIN_VOL="$(df / | grep -Eo '/dev/[^ ]+')"
-
-  # Dropbox Folder Backup
-  declare -g DROPBOX_FOLDER="/"
 
   # Time Vars
   declare -g NOW
@@ -162,7 +159,7 @@ function _setup_globals_and_options() {
   # PHP
   PHP="$(command -v php)"
 
-  export TAR FIND MYSQLDUMP MYSQL_ROOT MYSQLDUMP_ROOT PHP CERTBOT MySQL_CF MYSQL MYSQL_CONF DROPBOX_FOLDER MAIN_VOL TMP_DIR
+  export TAR FIND MYSQLDUMP MYSQL_ROOT MYSQLDUMP_ROOT PHP CERTBOT MySQL_CF MYSQL MYSQL_CONF MAIN_VOL TMP_DIR
 
 }
 
@@ -470,7 +467,7 @@ function script_init() {
 
   # EXPORT VARS
   export SCRIPT_V VPSNAME BROLIT_CONFIG_PATH SFOLDER BLACKLISTED_SITES BLACKLISTED_DATABASES WSERVER PACKAGES PHP_CF
-  export LENCRYPT_CF DROPBOX_FOLDER MAILCOW_DIR MAILCOW_TMP_BK MHOST MUSER NOW NOWDISPLAY DAYSAGO
+  export LENCRYPT_CF MAILCOW_DIR MAILCOW_TMP_BK MHOST MUSER NOW NOWDISPLAY DAYSAGO
   export DISK_U ONE_FILE_BK LOCAL_IP SERVER_IP SERVER_IPv6 NOTIFICATION_EMAIL_SMTP_SERVER NOTIFICATION_EMAIL_SMTP_PORT NOTIFICATION_EMAIL_SMTP_TLS NOTIFICATION_EMAIL_SMTP_USER NOTIFICATION_EMAIL_SMTP_UPASS
   export LOG DEBUG SKIPTESTS EXEC_TYPE
   export BROLIT_CONFIG_FILE
