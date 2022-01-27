@@ -130,7 +130,7 @@ function ask_project_type() {
   local project_types
   local project_type
 
-  project_types="WordPress X Laravel X Basic-PHP X HTML X"
+  project_types="WordPress X Laravel X PHP X HTML X"
 
   project_type="$(whiptail --title "SELECT PROJECT TYPE" --menu " " 20 78 10 $(for x in ${project_types}; do echo "$x"; done) 3>&1 1>&2 2>&3)"
   exitstatus=$?
