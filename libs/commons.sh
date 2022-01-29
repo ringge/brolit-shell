@@ -33,7 +33,7 @@ function _source_all_scripts() {
 
   # Load other sources
   source "${SFOLDER}/libs/notification_controller.sh"
-  #source "${SFOLDER}/libs/storage_controller.sh"
+  source "${SFOLDER}/libs/storage_controller.sh"
 
   log_event "info" "Sourcing dependencies ..." "false"
   #display --indent 6 --text "- Sourcing dependencies" --result "DONE" --color GREEN
@@ -80,14 +80,6 @@ function _setup_globals_and_options() {
   # MAILCOW BACKUP
   declare -g MAILCOW_DIR="/opt/mailcow-dockerized/"
   declare -g MAILCOW_TMP_BK="${SFOLDER}/tmp/mailcow"
-
-  # Packages to watch
-  #declare -g PHP_V
-  #PHP_V="$(php -r "echo PHP_VERSION;" | grep --only-matching --perl-regexp "7.\d+")"
-  #php_exit=$?
-  #if [[ ${php_exit} -eq 1 ]]; then
-  #  PACKAGES=(linux-firmware dpkg nginx "php${PHP_V}-fpm" mysql-server openssl)
-  #fi
 
   # MySQL host and user
   declare -g MHOST="localhost"
@@ -286,7 +278,7 @@ function _check_scripts_permissions() {
 }
 
 # TODO: refactor this function
-function _check_server_ip() {
+function get_server_ips() {
 
   # LOCAL IP (if server has configured a floating ip, it will return this)
   LOCAL_IP="$(/sbin/ifconfig eth0 | grep -w 'inet ' | awk '{print $2}')" # Could be a floating ip
@@ -303,8 +295,8 @@ function _check_server_ip() {
 
   log_event "info" "SERVER IPv4: ${SERVER_IP}" "false"
   log_event "info" "SERVER IPv6: ${SERVER_IPv6}" "false"
-  display --indent 2 --text "- Getting server IP" --result "DONE" --color GREEN
-  display --indent 4 --text "${SERVER_IP}"
+
+  export LOCAL_IP SERVER_IP SERVER_IPv6
 
 }
 
@@ -449,8 +441,8 @@ function script_init() {
   # Checking script permissions
   _check_scripts_permissions
 
-  # Checking server IP
-  _check_server_ip
+  # Get server IPs
+  get_server_ips
 
   # Clean old log files
   find "${path_log}" -name "*.log" -type f -mtime +7 -print -delete >>"${LOG}"
@@ -468,7 +460,7 @@ function script_init() {
   # EXPORT VARS
   export SCRIPT_V VPSNAME BROLIT_CONFIG_PATH SFOLDER BLACKLISTED_SITES BLACKLISTED_DATABASES WSERVER PACKAGES PHP_CF
   export LENCRYPT_CF MAILCOW_DIR MAILCOW_TMP_BK MHOST MUSER NOW NOWDISPLAY DAYSAGO
-  export DISK_U ONE_FILE_BK LOCAL_IP SERVER_IP SERVER_IPv6 NOTIFICATION_EMAIL_SMTP_SERVER NOTIFICATION_EMAIL_SMTP_PORT NOTIFICATION_EMAIL_SMTP_TLS NOTIFICATION_EMAIL_SMTP_USER NOTIFICATION_EMAIL_SMTP_UPASS
+  export DISK_U ONE_FILE_BK NOTIFICATION_EMAIL_SMTP_SERVER NOTIFICATION_EMAIL_SMTP_PORT NOTIFICATION_EMAIL_SMTP_TLS NOTIFICATION_EMAIL_SMTP_USER NOTIFICATION_EMAIL_SMTP_UPASS
   export LOG DEBUG SKIPTESTS EXEC_TYPE
   export BROLIT_CONFIG_FILE
 
