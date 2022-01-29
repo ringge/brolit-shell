@@ -12,14 +12,14 @@
 }
 
 ### Main dir check
-SFOLDER=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
-if [[ -z "${SFOLDER}" ]]; then
+BROLIT_MAIN_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
+if [[ -z "${BROLIT_MAIN_DIR}" ]]; then
   exit 1 # error; the path is not accessible
 fi
 
 ### Load Main library
-chmod +x "${SFOLDER}/libs/commons.sh"
-source "${SFOLDER}/libs/commons.sh"
+chmod +x "${BROLIT_MAIN_DIR}/libs/commons.sh"
+source "${BROLIT_MAIN_DIR}/libs/commons.sh"
 
 ### Init #######################################################################
 

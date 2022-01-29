@@ -137,7 +137,7 @@ function _brolit_configuration_load_backup_dropbox() {
         declare -g DROPBOX_UPLOADER
 
         # Dropbox-uploader directory
-        DPU_F="${SFOLDER}/tools/third-party/dropbox-uploader"
+        DPU_F="${BROLIT_MAIN_DIR}/tools/third-party/dropbox-uploader"
         # Dropbox-uploader runner
         DROPBOX_UPLOADER="${DPU_F}/dropbox_uploader.sh"
 
@@ -600,7 +600,7 @@ function _brolit_configuration_load_php() {
 
             if [[ ${PACKAGES_PHP_VERSION} == "default" ]]; then
 
-                source "${SFOLDER}/utils/installers/php_installer.sh"
+                source "${BROLIT_MAIN_DIR}/utils/installers/php_installer.sh"
                 PHP_V="$(php_get_standard_distro_version)"
 
             else
@@ -863,12 +863,12 @@ function _brolit_configuration_load_monit() {
     local server_config_file=$1
 
     # Globals
-    declare -g PACKAGES_MONIT_CONFIG_STATUS
+    declare -g PACKAGES_MONIT_STATUS
     declare -g PACKAGES_MONIT_CONFIG_MAILA
 
-    PACKAGES_MONIT_CONFIG_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.monit[].status")"
+    PACKAGES_MONIT_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.monit[].status")"
 
-    if [[ ${PACKAGES_MONIT_CONFIG_STATUS} == "enabled" ]]; then
+    if [[ ${PACKAGES_MONIT_STATUS} == "enabled" ]]; then
 
         PACKAGES_MONIT_CONFIG_MAILA="$(json_read_field "${server_config_file}" "PACKAGES.monit[].config[].monit_maila")"
 
@@ -904,7 +904,7 @@ function _brolit_configuration_load_monit() {
 
     fi
 
-    export PACKAGES_MONIT_CONFIG_STATUS PACKAGES_MONIT_CONFIG_MAILA
+    export PACKAGES_MONIT_STATUS PACKAGES_MONIT_CONFIG_MAILA
 
 }
 
@@ -1207,7 +1207,7 @@ function brolit_configuration_file_check() {
 
             [Yy]*)
 
-                cp "${SFOLDER}/config/brolit/brolit_conf.json" "${server_config_file}"
+                cp "${BROLIT_MAIN_DIR}/config/brolit/brolit_conf.json" "${server_config_file}"
 
                 log_event "critical" "Please, edit brolit_conf.json first, and then run the script again." "true"
 
@@ -1238,6 +1238,8 @@ function brolit_configuration_setup_check() {
 
     declare -g DEBUG
     declare -g QUIET
+    declare -g SKIPTESTS
+    declare -g BROLIT_TMP_DIR
 
     # Check if is already defined
     if [ -z "${DEBUG}" ]; then
@@ -1267,8 +1269,25 @@ function brolit_configuration_setup_check() {
             exit 1
         fi
     fi
+    # Check if is already defined
+    if [ -z "${BROLIT_TMP_DIR}" ]; then
+        BROLIT_TMP_DIR="$(json_read_field "${server_config_file}" "BROLIT_SETUP.config[].tmp_dir")"
 
-    export DEBUG QUIET SKIPTESTS
+        if [ -z "${BROLIT_TMP_DIR}" ]; then
+            echo "Missing required config vars"
+            exit 1
+        fi
+
+        # Creating temporary folders
+        if [[ ! -d ${BROLIT_TMP_DIR} ]]; then
+            mkdir "${BROLIT_TMP_DIR}"
+        fi
+        if [[ ! -d "${BROLIT_TMP_DIR}/${NOW}" ]]; then
+            mkdir "${BROLIT_TMP_DIR}/${NOW}"
+        fi
+    fi
+
+    export DEBUG QUIET SKIPTESTS BROLIT_TMP_DIR
 
 }
 ################################################################################

@@ -131,7 +131,7 @@ function system_change_current_ssh_port() {
     display --indent 6 --text "- Current SSH port: ${current_ssh_port}"
 
     # Download secure sshd_config
-    cp -f "${SFOLDER}/config/sshd_config" "/etc/ssh/sshd_config"
+    cp -f "${BROLIT_MAIN_DIR}/config/sshd_config" "/etc/ssh/sshd_config"
 
     # Change ssh default port
     sed -i "s/Port 22/Port ${new_ssh_port}/" "/etc/ssh/sshd_config"
@@ -244,7 +244,7 @@ function system_add_floating_IP() {
 
     if [[ "${ubuntu_v}" == "1804" ]]; then
 
-        cp "${SFOLDER}/config/networking/60-my-floating-ip.cfg" /etc/network/interfaces.d/60-my-floating-ip.cfg
+        cp "${BROLIT_MAIN_DIR}/config/networking/60-my-floating-ip.cfg" /etc/network/interfaces.d/60-my-floating-ip.cfg
         sed -i "s#your.float.ing.ip#${floating_IP}#" /etc/network/interfaces.d/60-my-floating-ip.cfg
         display --indent 6 --text "- Making network config changes" --result "DONE" --color GREEN
 
@@ -260,7 +260,7 @@ function system_add_floating_IP() {
 
         if [[ "${ubuntu_v}" == "2004" ]]; then
 
-            cp "${SFOLDER}/config/networking/60-floating-ip.yaml" /etc/netplan/60-floating-ip.yaml
+            cp "${BROLIT_MAIN_DIR}/config/networking/60-floating-ip.yaml" /etc/netplan/60-floating-ip.yaml
             sed -i "s#your.float.ing.ip#${floating_IP}#" /etc/netplan/60-floating-ip.yaml
             display --indent 6 --text "- Making network config changes" --result "DONE" --color GREEN
 

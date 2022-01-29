@@ -5,14 +5,14 @@
 ################################################################################
 
 ### Main dir check
-SFOLDER=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-SFOLDER=$(cd "$(dirname "${SFOLDER}")" && pwd)
-if [[ -z "${SFOLDER}" ]]; then
+BROLIT_MAIN_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+BROLIT_MAIN_DIR=$(cd "$(dirname "${BROLIT_MAIN_DIR}")" && pwd)
+if [[ -z "${BROLIT_MAIN_DIR}" ]]; then
   exit 1 # error; the path is not accessible
 fi
 
-# shellcheck source=${SFOLDER}/libs/commons.sh
-source "${SFOLDER}/libs/commons.sh"
+# shellcheck source=${BROLIT_MAIN_DIR}/libs/commons.sh
+source "${BROLIT_MAIN_DIR}/libs/commons.sh"
 
 ################################################################################
 
@@ -53,19 +53,19 @@ mail_footer "${SCRIPT_V}"
 email_template="default"
 
 # New full email file
-email_html_file="${TMP_DIR}/full-email-${NOW}.mail"
+email_html_file="${BROLIT_TMP_DIR}/full-email-${NOW}.mail"
 
 # Copy from template
-cp "${SFOLDER}/templates/emails/${email_template}/main-tpl.html" "${email_html_file}"
+cp "${BROLIT_MAIN_DIR}/templates/emails/${email_template}/main-tpl.html" "${email_html_file}"
 
 # Begin to replace
-sed -i '/{{server_info}}/r '"${TMP_DIR}/server_info-${NOW}.mail" "${email_html_file}"
-sed -i '/{{packages_section}}/r '"${TMP_DIR}/packages-${NOW}.mail" "${email_html_file}"
-sed -i '/{{certificates_section}}/r '"${TMP_DIR}/certificates-${NOW}.mail" "${email_html_file}"
-sed -i '/{{databases_backup_section}}/r '"${TMP_DIR}/db-bk-${NOW}.mail" "${email_html_file}"
-sed -i '/{{configs_backup_section}}/r '"${TMP_DIR}/config-bk-${NOW}.mail" "${email_html_file}"
-sed -i '/{{files_backup_section}}/r '"${TMP_DIR}/file-bk-${NOW}.mail" "${email_html_file}"
-sed -i '/{{footer}}/r '"${TMP_DIR}/footer-${NOW}.mail" "${email_html_file}"
+sed -i '/{{server_info}}/r '"${BROLIT_TMP_DIR}/server_info-${NOW}.mail" "${email_html_file}"
+sed -i '/{{packages_section}}/r '"${BROLIT_TMP_DIR}/packages-${NOW}.mail" "${email_html_file}"
+sed -i '/{{certificates_section}}/r '"${BROLIT_TMP_DIR}/certificates-${NOW}.mail" "${email_html_file}"
+sed -i '/{{databases_backup_section}}/r '"${BROLIT_TMP_DIR}/db-bk-${NOW}.mail" "${email_html_file}"
+sed -i '/{{configs_backup_section}}/r '"${BROLIT_TMP_DIR}/config-bk-${NOW}.mail" "${email_html_file}"
+sed -i '/{{files_backup_section}}/r '"${BROLIT_TMP_DIR}/file-bk-${NOW}.mail" "${email_html_file}"
+sed -i '/{{footer}}/r '"${BROLIT_TMP_DIR}/footer-${NOW}.mail" "${email_html_file}"
 
 # Delete vars not used anymore
 grep -v "{{server_info}}" "${email_html_file}" > "${email_html_file}_tmp"; mv "${email_html_file}_tmp" "${email_html_file}"
@@ -93,7 +93,7 @@ mail_send_notification "${email_subject}" "${mail_html}"
 cleanup
 
 # Write e-mail (debug)
-echo "${mail_html}" >"${TMP_DIR}/email-${NOW}.mail"
+echo "${mail_html}" >"${BROLIT_TMP_DIR}/email-${NOW}.mail"
 
 # Log End
 log_event "info" "BACKUP TASKS SCRIPT End -- $(date +%Y%m%d_%H%M)" "false"

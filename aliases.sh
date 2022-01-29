@@ -7,7 +7,7 @@
 # Server Name
 VPSNAME="${HOSTNAME}"
 
-SFOLDER="/root/brolit-shell"
+BROLIT_MAIN_DIR="/root/brolit-shell"
 
 # TODO: workaround
 declare -g EXEC_TYPE="alias"
@@ -27,7 +27,7 @@ if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" && -f ${DPU_CONFIG_FILE} ]]; then
     # shellcheck source=${DPU_CONFIG_FILE}
     source "${DPU_CONFIG_FILE}"
     # Dropbox-uploader directory
-    DPU_F="${SFOLDER}/tools/third-party/dropbox-uploader"
+    DPU_F="${BROLIT_MAIN_DIR}/tools/third-party/dropbox-uploader"
     # Dropbox-uploader runner
     DROPBOX_UPLOADER="${DPU_F}/dropbox_uploader.sh"
 
@@ -488,7 +488,7 @@ function _get_domain_extension() {
     next_lvl="${first_lvl}"
 
     local -i count=0
-    while ! grep --word-regexp --quiet ".${domain_ext}" "${SFOLDER}/config/domain_extension-list" && [ ! "${domain_ext#"$next_lvl"}" = "" ]; do
+    while ! grep --word-regexp --quiet ".${domain_ext}" "${BROLIT_MAIN_DIR}/config/domain_extension-list" && [ ! "${domain_ext#"$next_lvl"}" = "" ]; do
 
         # Remove next level domain-name
         domain_ext=${domain_ext#"$next_lvl."}
@@ -498,7 +498,7 @@ function _get_domain_extension() {
 
     done
 
-    if grep --word-regexp --quiet ".${domain_ext}" "${SFOLDER}/config/domain_extension-list"; then
+    if grep --word-regexp --quiet ".${domain_ext}" "${BROLIT_MAIN_DIR}/config/domain_extension-list"; then
 
         domain_ext=.${domain_ext}
 

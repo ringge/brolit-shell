@@ -126,8 +126,8 @@ function sftp_create_user() {
     log_event "debug" "Running: mv /etc/ssh/sshd_config /etc/ssh/sshd_config.bk"
 
     # Copy new config
-    cp "${SFOLDER}/config/sftp/sshd_config" "/etc/ssh/sshd_config"
-    log_event "debug" "Running: cp ${SFOLDER}/config/sftp/sshd_config /etc/ssh/sshd_config"
+    cp "${BROLIT_MAIN_DIR}/config/sftp/sshd_config" "/etc/ssh/sshd_config"
+    log_event "debug" "Running: cp ${BROLIT_MAIN_DIR}/config/sftp/sshd_config /etc/ssh/sshd_config"
 
     # Replace SFTP_U to new sftp user
     if [[ ${username} != "" ]]; then

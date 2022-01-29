@@ -194,7 +194,7 @@ function get_domain_extension() {
   next_lvl="${first_lvl}"
 
   local -i count=0
-  while ! grep --word-regexp --quiet ".${domain_ext}" "${SFOLDER}/config/domain_extension-list" && [ ! "${domain_ext#"$next_lvl"}" = "" ]; do
+  while ! grep --word-regexp --quiet ".${domain_ext}" "${BROLIT_MAIN_DIR}/config/domain_extension-list" && [ ! "${domain_ext#"$next_lvl"}" = "" ]; do
 
     # Remove next level domain-name
     domain_ext=${domain_ext#"$next_lvl."}
@@ -204,7 +204,7 @@ function get_domain_extension() {
 
   done
 
-  if grep --word-regexp --quiet ".${domain_ext}" "${SFOLDER}/config/domain_extension-list"; then
+  if grep --word-regexp --quiet ".${domain_ext}" "${BROLIT_MAIN_DIR}/config/domain_extension-list"; then
 
     domain_ext=.${domain_ext}
 

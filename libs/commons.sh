@@ -17,23 +17,23 @@
 function _source_all_scripts() {
 
   # Source all apps libs
-  libs_apps_path="${SFOLDER}/libs/apps"
+  libs_apps_path="${BROLIT_MAIN_DIR}/libs/apps"
   libs_apps_scripts="$(find "${libs_apps_path}" -maxdepth 1 -name '*.sh' -type f -print)"
   for f in ${libs_apps_scripts}; do source "${f}"; done
 
   # Source all local libs
-  libs_local_path="${SFOLDER}/libs/local"
+  libs_local_path="${BROLIT_MAIN_DIR}/libs/local"
   libs_local_scripts="$(find "${libs_local_path}" -maxdepth 1 -name '*.sh' -type f -print)"
   for j in ${libs_local_scripts}; do source "${j}"; done
 
   # Source utils
-  utils_path="${SFOLDER}/utils"
+  utils_path="${BROLIT_MAIN_DIR}/utils"
   utils_scripts="$(find "${utils_path}" -maxdepth 1 -name '*.sh' -type f -print)"
   for k in ${utils_scripts}; do source "${k}"; done
 
   # Load other sources
-  source "${SFOLDER}/libs/notification_controller.sh"
-  source "${SFOLDER}/libs/storage_controller.sh"
+  source "${BROLIT_MAIN_DIR}/libs/notification_controller.sh"
+  source "${BROLIT_MAIN_DIR}/libs/storage_controller.sh"
 
   log_event "info" "Sourcing dependencies ..." "false"
   #display --indent 6 --text "- Sourcing dependencies" --result "DONE" --color GREEN
@@ -79,7 +79,7 @@ function _setup_globals_and_options() {
 
   # MAILCOW BACKUP
   declare -g MAILCOW_DIR="/opt/mailcow-dockerized/"
-  declare -g MAILCOW_TMP_BK="${SFOLDER}/tmp/mailcow"
+  declare -g MAILCOW_TMP_BK="${BROLIT_MAIN_DIR}/tmp/mailcow"
 
   # MySQL host and user
   declare -g MHOST="localhost"
@@ -112,18 +112,6 @@ function _setup_globals_and_options() {
   declare -g startdir=""
   declare -g menutitle="Config Selection Menu"
 
-  # Temp folders
-  declare -g TMP_DIR
-
-  TMP_DIR="${SFOLDER}/tmp"
-  # Creating temporary folders
-  if [[ ! -d ${TMP_DIR} ]]; then
-    mkdir "${TMP_DIR}"
-  fi
-  if [[ ! -d "${TMP_DIR}/${NOW}" ]]; then
-    mkdir "${TMP_DIR}/${NOW}"
-  fi
-
   # TAR
   TAR="$(command -v tar)"
 
@@ -151,7 +139,7 @@ function _setup_globals_and_options() {
   # PHP
   PHP="$(command -v php)"
 
-  export TAR FIND MYSQLDUMP MYSQL_ROOT MYSQLDUMP_ROOT PHP CERTBOT MySQL_CF MYSQL MYSQL_CONF MAIN_VOL TMP_DIR
+  export TAR FIND MYSQLDUMP MYSQL_ROOT MYSQLDUMP_ROOT PHP CERTBOT MySQL_CF MYSQL MYSQL_CONF MAIN_VOL
 
 }
 
@@ -372,12 +360,12 @@ function script_init() {
 
   # Log
   timestamp="$(date +%Y%m%d_%H%M%S)"
-  path_log="${SFOLDER}/log"
-  if [[ ! -d "${SFOLDER}/log" ]]; then
-    mkdir "${SFOLDER}/log"
+  path_log="${BROLIT_MAIN_DIR}/log"
+  if [[ ! -d "${BROLIT_MAIN_DIR}/log" ]]; then
+    mkdir "${BROLIT_MAIN_DIR}/log"
   fi
   # Reports
-  path_reports="${SFOLDER}/reports"
+  path_reports="${BROLIT_MAIN_DIR}/reports"
   if [[ ! -d "${path_reports}" ]]; then
     mkdir "${path_reports}"
   fi
@@ -458,7 +446,7 @@ function script_init() {
   brolit_configuration_load "${BROLIT_CONFIG_FILE}"
 
   # EXPORT VARS
-  export SCRIPT_V VPSNAME BROLIT_CONFIG_PATH SFOLDER BLACKLISTED_SITES BLACKLISTED_DATABASES WSERVER PACKAGES PHP_CF
+  export SCRIPT_V VPSNAME BROLIT_CONFIG_PATH BROLIT_MAIN_DIR BLACKLISTED_SITES BLACKLISTED_DATABASES WSERVER PACKAGES PHP_CF
   export LENCRYPT_CF MAILCOW_DIR MAILCOW_TMP_BK MHOST MUSER NOW NOWDISPLAY DAYSAGO
   export DISK_U ONE_FILE_BK NOTIFICATION_EMAIL_SMTP_SERVER NOTIFICATION_EMAIL_SMTP_PORT NOTIFICATION_EMAIL_SMTP_TLS NOTIFICATION_EMAIL_SMTP_USER NOTIFICATION_EMAIL_SMTP_UPASS
   export LOG DEBUG SKIPTESTS EXEC_TYPE
@@ -496,7 +484,7 @@ function customize_ubuntu_login_message() {
   chmod -x /etc/update-motd.d/*
 
   # Copy new login message
-  cp "${SFOLDER}/config/motd/00-header" "/etc/update-motd.d"
+  cp "${BROLIT_MAIN_DIR}/config/motd/00-header" "/etc/update-motd.d"
 
   # Enable new message
   chmod +x "/etc/update-motd.d/00-header"
@@ -536,7 +524,7 @@ function install_script_aliases() {
   log_subsection "Bash Aliases"
 
   if [[ ! -f ~/.bash_aliases ]]; then
-    cp "${SFOLDER}/aliases.sh" ~/.bash_aliases
+    cp "${BROLIT_MAIN_DIR}/aliases.sh" ~/.bash_aliases
     display --indent 2 --text "- Installing script aliases" --result "DONE" --color GREEN
     display --indent 4 --text "Please now run: source ~/.bash_aliases" --tcolor CYAN
 
@@ -549,7 +537,7 @@ function install_script_aliases() {
 
     display --indent 2 --text "- Backup old aliases" --result "DONE" --color GREEN
 
-    cp "${SFOLDER}/aliases.sh" ~/.bash_aliases
+    cp "${BROLIT_MAIN_DIR}/aliases.sh" ~/.bash_aliases
 
     exitstatus=$?
     if [[ ${exitstatus} -eq 0 ]]; then
@@ -1548,24 +1536,24 @@ function menu_main_options() {
     fi
 
     if [[ ${chosen_type} == *"04"* ]]; then
-      # shellcheck source=${SFOLDER}/utils/database_manager.sh
-      source "${SFOLDER}/utils/database_manager.sh"
+      # shellcheck source=${BROLIT_MAIN_DIR}/utils/database_manager.sh
+      source "${BROLIT_MAIN_DIR}/utils/database_manager.sh"
 
       log_section "Database Manager"
       database_manager_menu   
 
     fi
     if [[ ${chosen_type} == *"05"* ]]; then
-      # shellcheck source=${SFOLDER}/utils/wpcli_manager.sh
-      source "${SFOLDER}/utils/wpcli_manager.sh"
+      # shellcheck source=${BROLIT_MAIN_DIR}/utils/wpcli_manager.sh
+      source "${BROLIT_MAIN_DIR}/utils/wpcli_manager.sh"
 
       log_section "WP-CLI Manager"
       wpcli_manager
 
     fi
     if [[ ${chosen_type} == *"06"* ]]; then
-      # shellcheck source=${SFOLDER}/utils/certbot_manager.sh
-      source "${SFOLDER}/utils/certbot_manager.sh"
+      # shellcheck source=${BROLIT_MAIN_DIR}/utils/certbot_manager.sh
+      source "${BROLIT_MAIN_DIR}/utils/certbot_manager.sh"
 
       log_section "Certbot Manager"
       certbot_manager_menu
@@ -1575,8 +1563,8 @@ function menu_main_options() {
 
       if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
 
-        # shellcheck source=${SFOLDER}/utils/cloudflare_manager.sh
-        source "${SFOLDER}/utils/cloudflare_manager.sh"
+        # shellcheck source=${BROLIT_MAIN_DIR}/utils/cloudflare_manager.sh
+        source "${BROLIT_MAIN_DIR}/utils/cloudflare_manager.sh"
 
         log_section "Cloudflare Manager"
         cloudflare_manager_menu
@@ -1643,7 +1631,7 @@ function menu_config_changes_detected() {
     log_event "debug" "Bypassing prompt..." "false"
 
     # shellcheck source=../utils/server_setup.sh
-    source "${SFOLDER}/utils/server_setup.sh"
+    source "${BROLIT_MAIN_DIR}/utils/server_setup.sh"
 
     # Check global to prevent running the script twice
     if [[ ${SERVER_PREPARED} == "false" ]]; then
@@ -1675,7 +1663,7 @@ function menu_config_changes_detected() {
       if [[ ${chosen_first_run_options} == *"01"* ]]; then
 
         # shellcheck source=../utils/server_setup.sh
-        source "${SFOLDER}/utils/server_setup.sh"
+        source "${BROLIT_MAIN_DIR}/utils/server_setup.sh"
 
         # Check global to prevent running the script twice
         if [[ ${SERVER_PREPARED} == "false" ]]; then
@@ -1733,7 +1721,7 @@ function menu_cron_script_tasks() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
-        install_crontab_script "${SFOLDER}/cron/backups_tasks.sh" "${scheduled_time}"
+        install_crontab_script "${BROLIT_MAIN_DIR}/cron/backups_tasks.sh" "${scheduled_time}"
 
       fi
 
@@ -1746,7 +1734,7 @@ function menu_cron_script_tasks() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
-        install_crontab_script "${SFOLDER}/cron/optimizer_tasks.sh" "${scheduled_time}"
+        install_crontab_script "${BROLIT_MAIN_DIR}/cron/optimizer_tasks.sh" "${scheduled_time}"
 
       fi
 
@@ -1759,7 +1747,7 @@ function menu_cron_script_tasks() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
-        install_crontab_script "${SFOLDER}/cron/wordpress_tasks.sh" "${scheduled_time}"
+        install_crontab_script "${BROLIT_MAIN_DIR}/cron/wordpress_tasks.sh" "${scheduled_time}"
 
       fi
 
@@ -1772,7 +1760,7 @@ function menu_cron_script_tasks() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
-        install_crontab_script "${SFOLDER}/cron/security_tasks.sh" "${scheduled_time}"
+        install_crontab_script "${BROLIT_MAIN_DIR}/cron/security_tasks.sh" "${scheduled_time}"
 
       fi
 
@@ -1785,7 +1773,7 @@ function menu_cron_script_tasks() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
-        install_crontab_script "${SFOLDER}/cron/uptime_tasks.sh" "${scheduled_time}"
+        install_crontab_script "${BROLIT_MAIN_DIR}/cron/uptime_tasks.sh" "${scheduled_time}"
 
       fi
 
@@ -1798,7 +1786,7 @@ function menu_cron_script_tasks() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
-        install_crontab_script "${SFOLDER}/cron/updater.sh" "${scheduled_time}"
+        install_crontab_script "${BROLIT_MAIN_DIR}/cron/updater.sh" "${scheduled_time}"
 
       fi
 

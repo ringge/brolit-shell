@@ -27,15 +27,15 @@ function _make_temp_files_backup() {
   display --indent 6 --text "- Creating backup on temp directory"
 
   # Moving project files to temp directory
-  mkdir "${SFOLDER}/tmp/old_backups"
-  mv "${folder_to_backup}" "${SFOLDER}/tmp/old_backups"
+  mkdir "${BROLIT_MAIN_DIR}/tmp/old_backups"
+  mv "${folder_to_backup}" "${BROLIT_MAIN_DIR}/tmp/old_backups"
 
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
     # Log
     clear_previous_lines "1"
-    log_event "info" "Temp backup completed and stored here: ${SFOLDER}/tmp/old_backups" "false"
+    log_event "info" "Temp backup completed and stored here: ${BROLIT_MAIN_DIR}/tmp/old_backups" "false"
     display --indent 6 --text "- Creating backup on temp directory" --result "DONE" --color GREEN
 
     return 0
@@ -109,16 +109,16 @@ function restore_backup_from_local_file() {
         project_domain="$(ask_project_domain "")"
 
         # Decompress backup
-        mkdir "${TMP_DIR}/${project_domain}"
-        decompress "${filename}" "${TMP_DIR}/${project_domain}" "lbzip2"
+        mkdir "${BROLIT_TMP_DIR}/${project_domain}"
+        decompress "${filename}" "${BROLIT_TMP_DIR}/${project_domain}" "lbzip2"
 
-        dir_count="$(count_directories_on_directory "${TMP_DIR}/${project_domain}")"
+        dir_count="$(count_directories_on_directory "${BROLIT_TMP_DIR}/${project_domain}")"
 
         if [[ ${dir_count} -eq 1 ]]; then
 
           # Move files one level up
-          main_dir="$(ls -1 "${TMP_DIR}/${project_domain}")"
-          mv "${TMP_DIR}/${project_domain}/${main_dir}/"{.,}* "${TMP_DIR}/${project_domain}"
+          main_dir="$(ls -1 "${BROLIT_TMP_DIR}/${project_domain}")"
+          mv "${BROLIT_TMP_DIR}/${project_domain}/${main_dir}/"{.,}* "${BROLIT_TMP_DIR}/${project_domain}"
 
         fi
 
@@ -160,7 +160,7 @@ function restore_backup_from_local_file() {
         log_event "info" "File to restore: ${filepath}/${filename}" "false"
 
         # Copy to tmp dir
-        cp "${filepath}/${filename}" "${TMP_DIR}"
+        cp "${filepath}/${filename}" "${BROLIT_TMP_DIR}"
 
         project_name="$(ask_project_name "")"
         project_state="$(ask_project_state "")"
@@ -213,7 +213,7 @@ function restore_backup_from_ftp() {
     ftp_pass="$(whiptail_imput "FTP SERVER PASS" "Please insert de FTP password.")"
 
     ## Download files from ftp
-    ftp_download "${ftp_domain}" "${ftp_path}" "${ftp_user}" "${ftp_pass}" "${TMP_DIR}/${project_domain}"
+    ftp_download "${ftp_domain}" "${ftp_path}" "${ftp_user}" "${ftp_pass}" "${BROLIT_TMP_DIR}/${project_domain}"
 
     exitstatus=$?
     if [[ ${exitstatus} -eq 1 ]]; then
@@ -231,8 +231,8 @@ function restore_backup_from_ftp() {
 
     # Find backups from downloaded ftp files
     find_result="$({
-      find "${TMP_DIR}/${project_domain}" -name "*.sql"
-      find "${TMP_DIR}/${project_domain}" -name "*.sql.gz"
+      find "${BROLIT_TMP_DIR}/${project_domain}" -name "*.sql"
+      find "${BROLIT_TMP_DIR}/${project_domain}" -name "*.sql.gz"
     })"
 
     if [[ ${find_result} != "" ]]; then
@@ -260,7 +260,7 @@ function restore_backup_from_ftp() {
     fi
 
     # Restore files
-    move_files "${TMP_DIR}/${project_domain}" "${PROJECTS_PATH}"
+    move_files "${BROLIT_TMP_DIR}/${project_domain}" "${PROJECTS_PATH}"
 
   fi
 
@@ -307,9 +307,9 @@ function restore_backup_from_public_url() {
   folder_to_install="$(ask_folder_to_install_sites "${PROJECTS_PATH}")"
 
   log_event "debug" "Creating tmp directories" "false"
-  mkdir "${TMP_DIR}"
-  mkdir "${TMP_DIR}/${project_domain}"
-  cd "${TMP_DIR}/${project_domain}"
+  mkdir "${BROLIT_TMP_DIR}"
+  mkdir "${BROLIT_TMP_DIR}/${project_domain}"
+  cd "${BROLIT_TMP_DIR}/${project_domain}"
 
   # File Backup details
   bk_f_file=${source_files_url##*/}
@@ -352,8 +352,8 @@ function restore_backup_from_public_url() {
 
   # Find backups from downloaded ftp files
   find_result="$({
-    find "${TMP_DIR}/${project_domain}" -name "*.sql"
-    find "${TMP_DIR}/${project_domain}" -name "*.sql.gz"
+    find "${BROLIT_TMP_DIR}/${project_domain}" -name "*.sql"
+    find "${BROLIT_TMP_DIR}/${project_domain}" -name "*.sql.gz"
   })"
 
   if [[ ${find_result} != "" ]]; then
@@ -382,7 +382,7 @@ function restore_backup_from_public_url() {
 
   # Move to ${folder_to_install}
   log_event "info" "Moving ${project_domain} to ${folder_to_install} ..." "false"
-  mv "${SFOLDER}/tmp/${project_domain}" "${folder_to_install}/${project_domain}"
+  mv "${BROLIT_MAIN_DIR}/tmp/${project_domain}" "${folder_to_install}/${project_domain}"
 
   change_ownership "www-data" "www-data" "${folder_to_install}/${project_domain}"
 
@@ -427,7 +427,7 @@ function restore_backup_from_public_url() {
 
   # Remove tmp files
   log_event "info" "Removing downloaded files ..." "false"
-  rm -r "${SFOLDER}/tmp/${project_domain}"
+  rm -r "${BROLIT_MAIN_DIR}/tmp/${project_domain}"
 
   # Send notifications
   send_notification "✅ ${VPSNAME}" "Project ${project_name} restored!"
@@ -498,7 +498,7 @@ function restore_backup_server_selection() {
 # Arguments:
 #   $1 = ${project_name}
 #   $2 = ${project_state}
-#   $3 = ${project_backup} - The backup file must be in ${TMP_DIR}
+#   $3 = ${project_backup} - The backup file must be in ${BROLIT_TMP_DIR}
 #
 # Outputs:
 #   0 if ok, 1 on error.
@@ -529,20 +529,20 @@ function restore_database_backup() {
   else
 
     # Create temporary folder for backups
-    if [[ ! -d "${TMP_DIR}/backups" ]]; then
-      mkdir "${TMP_DIR}/backups"
-      log_event "info" "Temp files directory created: ${TMP_DIR}/backups" "false"
+    if [[ ! -d "${BROLIT_TMP_DIR}/backups" ]]; then
+      mkdir "${BROLIT_TMP_DIR}/backups"
+      log_event "info" "Temp files directory created: ${BROLIT_TMP_DIR}/backups" "false"
     fi
 
     # Make backup of actual database
     log_event "info" "MySQL database ${db_name} already exists" "false"
-    mysql_database_export "${db_name}" "${TMP_DIR}/backups/${db_name}_bk_before_restore.sql"
+    mysql_database_export "${db_name}" "${BROLIT_TMP_DIR}/backups/${db_name}_bk_before_restore.sql"
 
   fi
 
   # Restore database
   project_backup="${project_backup%%.*}.sql"
-  mysql_database_import "${project_name}_${project_state}" "${TMP_DIR}/${project_backup}"
+  mysql_database_import "${project_name}_${project_state}" "${BROLIT_TMP_DIR}/${project_backup}"
 
   if [[ ${exitstatus} -eq 0 ]]; then
     # Deleting temp files
@@ -597,7 +597,7 @@ function restore_config_files_from_dropbox() {
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
-    cd "${SFOLDER}/tmp"
+    cd "${BROLIT_MAIN_DIR}/tmp"
 
     # Downloading Config Backup
     display --indent 6 --text "- Downloading config backup from dropbox"
@@ -613,7 +613,7 @@ function restore_config_files_from_dropbox() {
     cd "${chosen_config_type}"
 
     # Decompress
-    decompress "${chosen_config_bk}" "${SFOLDER}/tmp/${chosen_config_type}" "lbzip2"
+    decompress "${chosen_config_bk}" "${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}" "lbzip2"
 
     if [[ "${chosen_config_bk}" == *"nginx"* ]]; then
 
@@ -621,25 +621,25 @@ function restore_config_files_from_dropbox() {
 
     fi
     if [[ "${CHOSEN_CONFIG}" == *"mysql"* ]]; then
-      log_event "info" "MySQL Config backup downloaded and uncompressed on  ${SFOLDER}/tmp/${chosen_config_type}"
-      whiptail_message "IMPORTANT!" "MySQL config files were downloaded on this temp directory: ${SFOLDER}/tmp/${chosen_config_type}."
+      log_event "info" "MySQL Config backup downloaded and uncompressed on  ${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}"
+      whiptail_message "IMPORTANT!" "MySQL config files were downloaded on this temp directory: ${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}."
 
     fi
     if [[ "${CHOSEN_CONFIG}" == *"php"* ]]; then
-      log_event "info" "PHP config backup downloaded and uncompressed on  ${SFOLDER}/tmp/${chosen_config_type}"
-      whiptail_message "IMPORTANT!" "PHP config files were downloaded on this temp directory: ${SFOLDER}/tmp/${chosen_config_type}."
+      log_event "info" "PHP config backup downloaded and uncompressed on  ${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}"
+      whiptail_message "IMPORTANT!" "PHP config files were downloaded on this temp directory: ${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}."
 
     fi
     if [[ "${CHOSEN_CONFIG}" == *"letsencrypt"* ]]; then
-      log_event "info" "Let's Encrypt config backup downloaded and uncompressed on  ${SFOLDER}/tmp/${chosen_config_type}"
-      whiptail_message "IMPORTANT!" "Let's Encrypt config files were downloaded on this temp directory: ${SFOLDER}/tmp/${chosen_config_type}."
+      log_event "info" "Let's Encrypt config backup downloaded and uncompressed on  ${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}"
+      whiptail_message "IMPORTANT!" "Let's Encrypt config files were downloaded on this temp directory: ${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}."
 
     fi
 
     # TODO: ask for remove tmp files
-    #echo " > Removing ${SFOLDER}/tmp/${chosen_type} ..." >>$LOG
-    #echo -e ${GREEN}" > Removing ${SFOLDER}/tmp/${chosen_type} ..."${ENDCOLOR}
-    #rm -R ${SFOLDER}/tmp/${chosen_type}
+    #echo " > Removing ${BROLIT_MAIN_DIR}/tmp/${chosen_type} ..." >>$LOG
+    #echo -e ${GREEN}" > Removing ${BROLIT_MAIN_DIR}/tmp/${chosen_type} ..."${ENDCOLOR}
+    #rm -R ${BROLIT_MAIN_DIR}/tmp/${chosen_type}
 
   fi
 
@@ -683,8 +683,8 @@ function restore_nginx_site_files() {
   display --indent 6 --text "- Downloading nginx backup from dropbox" --result "DONE" --color GREEN
 
   # Extract tar.bz2 with lbzip2
-  mkdir "${SFOLDER}/tmp/nginx"
-  decompress "${bk_file}" "${SFOLDER}/tmp/nginx" "lbzip2"
+  mkdir "${BROLIT_MAIN_DIR}/tmp/nginx"
+  decompress "${bk_file}" "${BROLIT_MAIN_DIR}/tmp/nginx" "lbzip2"
 
   # TODO: if nginx is installed, ask if nginx.conf must be replace
 
@@ -695,7 +695,7 @@ function restore_nginx_site_files() {
 
     if [[ -z "${domain}" ]]; then
 
-      startdir="${SFOLDER}/tmp/nginx/sites-available"
+      startdir="${BROLIT_MAIN_DIR}/tmp/nginx/sites-available"
       file_browser "$menutitle" "$startdir"
 
       to_restore=${filepath}"/"${filename}
@@ -703,7 +703,7 @@ function restore_nginx_site_files() {
 
     else
 
-      to_restore="${SFOLDER}/tmp/nginx/sites-available/${domain}"
+      to_restore="${BROLIT_MAIN_DIR}/tmp/nginx/sites-available/${domain}"
       filename=${domain}
 
       log_event "info" "File to restore: ${to_restore} ..."
@@ -768,10 +768,10 @@ function restore_letsencrypt_site_files() {
   dropbox_output=$(${DROPBOX_UPLOADER} download "${bk_to_download}" 1>&2)
 
   # Extract tar.bz2 with lbzip2
-  log_event "info" "Extracting ${bk_file} on ${SFOLDER}/tmp/"
+  log_event "info" "Extracting ${bk_file} on ${BROLIT_MAIN_DIR}/tmp/"
 
-  mkdir "${SFOLDER}/tmp/letsencrypt"
-  decompress "${bk_file}" "${SFOLDER}/tmp/letsencrypt" "lbzip2"
+  mkdir "${BROLIT_MAIN_DIR}/tmp/letsencrypt"
+  decompress "${bk_file}" "${BROLIT_MAIN_DIR}/tmp/letsencrypt" "lbzip2"
 
   # Creating directories
   if [[ ! -d "/etc/letsencrypt/archive/" ]]; then
@@ -793,21 +793,21 @@ function restore_letsencrypt_site_files() {
 
   # Check if file exist
   if [[ ! -f "/etc/letsencrypt/options-ssl-nginx.conf" ]]; then
-    cp -r "${SFOLDER}/tmp/letsencrypt/options-ssl-nginx.conf" "/etc/letsencrypt/"
+    cp -r "${BROLIT_MAIN_DIR}/tmp/letsencrypt/options-ssl-nginx.conf" "/etc/letsencrypt/"
 
   fi
   if [[ ! -f "/etc/letsencrypt/ssl-dhparams.pem" ]]; then
-    cp -r "${SFOLDER}/tmp/letsencrypt/ssl-dhparams.pem" "/etc/letsencrypt/"
+    cp -r "${BROLIT_MAIN_DIR}/tmp/letsencrypt/ssl-dhparams.pem" "/etc/letsencrypt/"
 
   fi
 
   # TODO: Restore main files (checking non-www and www domains)
-  if [[ ! -f "${SFOLDER}/tmp/letsencrypt/archive/${domain}" ]]; then
-    cp -r "${SFOLDER}/tmp/letsencrypt/archive/${domain}" "/etc/letsencrypt/archive/"
+  if [[ ! -f "${BROLIT_MAIN_DIR}/tmp/letsencrypt/archive/${domain}" ]]; then
+    cp -r "${BROLIT_MAIN_DIR}/tmp/letsencrypt/archive/${domain}" "/etc/letsencrypt/archive/"
 
   fi
-  if [[ ! -f "${SFOLDER}/tmp/letsencrypt/live/${domain}" ]]; then
-    cp -r "${SFOLDER}/tmp/letsencrypt/live/${domain}" "/etc/letsencrypt/live/"
+  if [[ ! -f "${BROLIT_MAIN_DIR}/tmp/letsencrypt/live/${domain}" ]]; then
+    cp -r "${BROLIT_MAIN_DIR}/tmp/letsencrypt/live/${domain}" "/etc/letsencrypt/live/"
 
   fi
 
@@ -851,8 +851,8 @@ function restore_site_files() {
     display --indent 8 --text "${chosen_domain}" --tcolor YELLOW
 
     # If user change project domains, we need to do this
-    project_tmp_old_folder="${TMP_DIR}/${domain}"
-    project_tmp_new_folder="${TMP_DIR}/${chosen_domain}"
+    project_tmp_old_folder="${BROLIT_TMP_DIR}/${domain}"
+    project_tmp_new_folder="${BROLIT_TMP_DIR}/${chosen_domain}"
 
     # Renaming
     if [[ ${project_tmp_old_folder} != "${project_tmp_new_folder}" ]]; then
@@ -974,10 +974,10 @@ function restore_type_selection_from_dropbox() {
           bk_to_dowload="${chosen_server}/${chosen_type}/${chosen_project}/${chosen_backup_to_restore}"
 
           # Downloading Backup
-          dropbox_download "${bk_to_dowload}" "${TMP_DIR}"
+          dropbox_download "${bk_to_dowload}" "${BROLIT_TMP_DIR}"
 
           # Decompress
-          decompress "${TMP_DIR}/${chosen_backup_to_restore}" "${TMP_DIR}" "lbzip2"
+          decompress "${BROLIT_TMP_DIR}/${chosen_backup_to_restore}" "${BROLIT_TMP_DIR}" "lbzip2"
 
           if [[ ${chosen_type} == *"database"* ]]; then
 
@@ -1157,16 +1157,16 @@ function restore_project() {
 
     # Download backup
     bk_to_dowload="${chosen_server}/site/${chosen_project}/${chosen_backup_to_restore}"
-    dropbox_download "${bk_to_dowload}" "${TMP_DIR}"
+    dropbox_download "${bk_to_dowload}" "${BROLIT_TMP_DIR}"
 
     # Decompress
-    decompress "${TMP_DIR}/${chosen_backup_to_restore}" "${TMP_DIR}" "lbzip2"
+    decompress "${BROLIT_TMP_DIR}/${chosen_backup_to_restore}" "${BROLIT_TMP_DIR}" "lbzip2"
 
     # Create nginx.conf file if not exists
-    touch "${TMP_DIR}/nginx.conf"
+    touch "${BROLIT_TMP_DIR}/nginx.conf"
 
     # Project Type
-    project_type="$(project_get_type "${TMP_DIR}/${chosen_project}")"
+    project_type="$(project_get_type "${BROLIT_TMP_DIR}/${chosen_project}")"
 
     log_event "debug" "Project Type: ${project_type}" "false"
 
@@ -1182,9 +1182,9 @@ function restore_project() {
       display --indent 8 --text "Project Type WordPress" --tcolor GREEN
 
       # Reading config file
-      db_name="$(project_get_configured_database "${TMP_DIR}/${chosen_project}" "${project_type}")"
-      db_user="$(project_get_configured_database_user "${TMP_DIR}/${chosen_project}" "${project_type}")"
-      db_pass="$(project_get_configured_database_userpassw "${TMP_DIR}/${chosen_project}" "${project_type}")"
+      db_name="$(project_get_configured_database "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
+      db_user="$(project_get_configured_database_user "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
+      db_pass="$(project_get_configured_database_userpassw "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
 
       # Restore site files
       new_project_domain="$(restore_site_files "${chosen_domain}")"
@@ -1232,7 +1232,7 @@ function restore_project() {
     if [[ ${db_name} != "" ]]; then
 
       # Downloading Database Backup
-      dropbox_download "${db_to_download}" "${TMP_DIR}"
+      dropbox_download "${db_to_download}" "${BROLIT_TMP_DIR}"
 
       exitstatus=$?
       if [[ ${exitstatus} -eq 1 ]]; then
@@ -1252,7 +1252,7 @@ function restore_project() {
     fi
 
     # Decompress
-    decompress "${TMP_DIR}/${db_name}_database_${backup_date}.tar.bz2" "${TMP_DIR}" "lbzip2"
+    decompress "${BROLIT_TMP_DIR}/${db_name}_database_${backup_date}.tar.bz2" "${BROLIT_TMP_DIR}" "lbzip2"
 
     # Extract project name from domain
     possible_project_name="$(project_get_name_from_domain "${new_project_domain}")"

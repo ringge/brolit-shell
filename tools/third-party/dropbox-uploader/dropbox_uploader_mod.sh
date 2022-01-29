@@ -32,7 +32,7 @@ CHUNK_SIZE=50
 #CURL_BIN="/usr/bin/curl"
 
 #Default values
-TMP_DIR="/tmp"
+BROLIT_TMP_DIR="/tmp"
 DEBUG=0
 QUIET=0
 SHOW_PROGRESSBAR=0
@@ -62,9 +62,9 @@ API_SAVEURL_URL="https://api.dropboxapi.com/2/files/save_url"
 API_SAVEURL_JOBSTATUS_URL="https://api.dropboxapi.com/2/files/save_url/check_job_status"
 API_SEARCH_URL="https://api.dropboxapi.com/2/files/search"
 APP_CREATE_URL="https://www.dropbox.com/developers/apps"
-RESPONSE_FILE="$TMP_DIR/du_resp_$RANDOM"
-CHUNK_FILE="$TMP_DIR/du_chunk_$RANDOM"
-TEMP_FILE="$TMP_DIR/du_tmp_$RANDOM"
+RESPONSE_FILE="$BROLIT_TMP_DIR/du_resp_$RANDOM"
+CHUNK_FILE="$BROLIT_TMP_DIR/du_chunk_$RANDOM"
+TEMP_FILE="$BROLIT_TMP_DIR/du_tmp_$RANDOM"
 BIN_DEPS="sed basename date grep stat dd mkdir"
 VERSION="1.0"
 
@@ -80,9 +80,9 @@ shopt -s nullglob #Bash allows filename patterns which match no files to expand 
 shopt -s dotglob  #Bash includes filenames beginning with a "." in the results of filename expansion
 
 #Check temp folder
-if [[ ! -d "$TMP_DIR" ]]; then
-    echo -e "Error: the temporary folder $TMP_DIR doesn't exists!"
-    echo -e "Please edit this script and set the TMP_DIR variable to a valid temporary folder to use."
+if [[ ! -d "$BROLIT_TMP_DIR" ]]; then
+    echo -e "Error: the temporary folder $BROLIT_TMP_DIR doesn't exists!"
+    echo -e "Please edit this script and set the BROLIT_TMP_DIR variable to a valid temporary folder to use."
     exit 1
 fi
 
@@ -140,7 +140,7 @@ if [[ $DEBUG != 0 ]]; then
     uname -a 2> /dev/null
     cat /etc/issue 2> /dev/null
     set -x
-    RESPONSE_FILE="$TMP_DIR/du_resp_debug"
+    RESPONSE_FILE="$BROLIT_TMP_DIR/du_resp_debug"
 fi
 
 if [[ $CURL_BIN == "" ]]; then
@@ -1110,7 +1110,7 @@ function db_list_outfile
         HAS_MORE="true"
     fi
 
-    OUT_FILE="$TMP_DIR/du_tmp_out_$RANDOM"
+    OUT_FILE="$BROLIT_TMP_DIR/du_tmp_out_$RANDOM"
 
     while (true); do
 

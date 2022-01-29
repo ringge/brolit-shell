@@ -5,14 +5,14 @@
 ################################################################################
 
 ### Main dir check
-SFOLDER=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-SFOLDER=$(cd "$(dirname "${SFOLDER}")" && pwd)
-if [[ -z "${SFOLDER}" ]]; then
+BROLIT_MAIN_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+BROLIT_MAIN_DIR=$(cd "$(dirname "${BROLIT_MAIN_DIR}")" && pwd)
+if [[ -z "${BROLIT_MAIN_DIR}" ]]; then
   exit 1 # error; the path is not accessible
 fi
 
-# shellcheck source=${SFOLDER}/libs/commons.sh
-source "${SFOLDER}/libs/commons.sh"
+# shellcheck source=${BROLIT_MAIN_DIR}/libs/commons.sh
+source "${BROLIT_MAIN_DIR}/libs/commons.sh"
 
 ################################################################################
 

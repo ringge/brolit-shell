@@ -81,7 +81,7 @@ function make_server_files_backup() {
     old_bk_file="${bk_sup_type}-${bk_type}-files-${DAYSAGO}.tar.bz2"
 
     # Compress backup
-    backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${TMP_DIR}/${NOW}/${backup_file}")"
+    backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${BROLIT_TMP_DIR}/${NOW}/${backup_file}")"
 
     # Check test result
     compress_result=$?
@@ -103,8 +103,8 @@ function make_server_files_backup() {
       remote_path="${VPSNAME}/${bk_type}/${bk_sup_type}"
 
       # Uploading backup files
-      storage_upload_backup "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
-      #dropbox_upload "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
+      storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
+      #dropbox_upload "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
       # Deleting old backup files
       storage_delete_backup "${remote_path}/${old_bk_file}"
@@ -423,7 +423,7 @@ function make_sites_files_backup() {
   done
 
   # Deleting old backup files
-  rm --recursive --force "${TMP_DIR:?}/${NOW}"
+  rm --recursive --force "${BROLIT_TMP_DIR:?}/${NOW}"
 
   # DUPLICITY
   duplicity_backup
@@ -507,20 +507,20 @@ function make_files_backup() {
   if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" || ${BACKUP_SFTP_STATUS} == "enabled" ]]; then
 
     # Compress backup
-    backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${TMP_DIR}/${NOW}/${backup_file}")"
+    backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${BROLIT_TMP_DIR}/${NOW}/${backup_file}")"
 
     # Check test result
     compress_result=$?
     if [[ ${compress_result} -eq 0 ]]; then
 
       # Upload backup
-      storage_upload_backup "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
+      storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
       # Delete old backup from Dropbox
       storage_delete_backup "${remote_path}/${old_bk_file}"
 
       # Delete temp backup
-      rm --force "${TMP_DIR}/${NOW}/${backup_file}"
+      rm --force "${BROLIT_TMP_DIR}/${NOW}/${backup_file}"
 
       # Log
       log_event "info" "Temp backup deleted from server" "false"
@@ -698,7 +698,7 @@ function make_database_backup() {
 
   local mysql_export_result
 
-  local directory_to_backup="${TMP_DIR}/${NOW}/"
+  local directory_to_backup="${BROLIT_TMP_DIR}/${NOW}/"
   local db_file="${database}_database_${NOW}.sql"
 
   local backup_file="${database}_database_${NOW}.tar.bz2"
@@ -714,7 +714,7 @@ function make_database_backup() {
   if [[ ${mysql_export_result} -eq 0 ]]; then
 
     # Compress backup
-    backup_file_size="$(compress "${directory_to_backup}" "${db_file}" "${TMP_DIR}/${NOW}/${backup_file}")"
+    backup_file_size="$(compress "${directory_to_backup}" "${db_file}" "${BROLIT_TMP_DIR}/${NOW}/${backup_file}")"
 
     # Check test result
     compress_result=$?
@@ -722,7 +722,7 @@ function make_database_backup() {
 
       # Return
       ## backupfile backup_file_size
-      echo "${TMP_DIR}/${NOW}/${backup_file};${backup_file_size}"
+      echo "${BROLIT_TMP_DIR}/${NOW}/${backup_file};${backup_file_size}"
 
     else
 
@@ -789,7 +789,7 @@ function make_project_backup() {
 
     log_event "info" "Deleting backup from server ..." "false"
 
-    rm --recursive --force "${TMP_DIR}/${NOW}/${backup_type}"
+    rm --recursive --force "${BROLIT_TMP_DIR}/${NOW}/${backup_type}"
 
     log_event "info" "Project backup done" "false"
 

@@ -76,11 +76,11 @@ function test_wordpress_helper_funtions() {
     project_domain="test.domain.com"
 
     # Create mock project
-    wpcli_core_download "${SFOLDER}/tmp/${project_domain}"
+    wpcli_core_download "${BROLIT_MAIN_DIR}/tmp/${project_domain}"
 
     # Tests
-    test_wp_config_path "${SFOLDER}/tmp/${project_domain}"
-    test_is_wp_project "${SFOLDER}/tmp/${project_domain}"
+    test_wp_config_path "${BROLIT_MAIN_DIR}/tmp/${project_domain}"
+    test_is_wp_project "${BROLIT_MAIN_DIR}/tmp/${project_domain}"
 
     # Deleting temp files
     #rm -R "${PROJECTS_PATH}/${project_domain}"

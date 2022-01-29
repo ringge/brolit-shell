@@ -939,7 +939,7 @@ function mysql_database_rename() {
     local database_old_name=$1
     local database_new_name=$2
 
-    local dump_file="${TMP_DIR}/${database_old_name}_bk_before_rename_db.sql"
+    local dump_file="${BROLIT_TMP_DIR}/${database_old_name}_bk_before_rename_db.sql"
 
     mysql_database_export "${database_old_name}" "${dump_file}"
 
@@ -957,7 +957,7 @@ function mysql_database_clone() {
     local database_old_name=$1
     local database_new_name=$2
 
-    local dump_file="${TMP_DIR}/${database_old_name}_bk_before_clone_db.sql"
+    local dump_file="${BROLIT_TMP_DIR}/${database_old_name}_bk_before_clone_db.sql"
 
     mysql_database_export "${database_old_name}" "${dump_file}"
 

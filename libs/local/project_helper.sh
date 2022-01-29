@@ -321,7 +321,7 @@ function project_create_config() {
   else
 
     # Copy empty config file
-    cp "${SFOLDER}/config/brolit/brolit_project.json" "${project_config_file}"
+    cp "${BROLIT_MAIN_DIR}/config/brolit/brolit_project.json" "${project_config_file}"
 
   fi
 
@@ -1029,7 +1029,7 @@ function project_delete_files() {
     display --indent 6 --text "- Deleting project files on server" --result "DONE" --color GREEN
 
     # Make a copy of nginx configuration file
-    cp --recursive "/etc/nginx/sites-available/${project_domain}" "${TMP_DIR}"
+    cp --recursive "/etc/nginx/sites-available/${project_domain}" "${BROLIT_TMP_DIR}"
 
     # Send notification
     send_notification "⚠️ ${VPSNAME}" "Project files for '${project_domain}' deleted!"
@@ -1249,7 +1249,7 @@ function project_delete() {
   # TODO: Delete config file? or maybe rename it with "-offline"?
 
   # Delete tmp backups
-  display --indent 2 --text "Please, remove ${TMP_DIR} after check backup was uploaded ok" --tcolor YELLOW
+  display --indent 2 --text "Please, remove ${BROLIT_TMP_DIR} after check backup was uploaded ok" --tcolor YELLOW
 
 }
 

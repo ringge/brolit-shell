@@ -57,7 +57,7 @@ function nginx_server_create() {
         nginx_server_file="${WSERVER}/sites-available/${project_domain}"
 
         # Copy config from template file
-        cp "${SFOLDER}/config/nginx/sites-available/${project_type}_${server_type}" "${nginx_server_file}"
+        cp "${BROLIT_MAIN_DIR}/config/nginx/sites-available/${project_type}_${server_type}" "${nginx_server_file}"
 
         # Symbolic link
         ln -s "${nginx_server_file}" "${WSERVER}/sites-enabled/${project_domain}"
@@ -78,7 +78,7 @@ function nginx_server_create() {
         nginx_server_file_link="${WSERVER}/sites-enabled/${redirect_domains}"
 
         # Copy config from template file
-        cp "${SFOLDER}/config/nginx/sites-available/${project_type}_${server_type}" "${nginx_server_file}"
+        cp "${BROLIT_MAIN_DIR}/config/nginx/sites-available/${project_type}_${server_type}" "${nginx_server_file}"
 
         # Creating symbolic link
         ln -s "${nginx_server_file}" "${nginx_server_file_link}"
@@ -366,11 +366,11 @@ function nginx_server_change_phpv() {
 function nginx_reconfigure() {
 
     # nginx.conf broobe standard configuration
-    cat "${SFOLDER}/config/nginx/nginx.conf" >"/etc/nginx/nginx.conf"
+    cat "${BROLIT_MAIN_DIR}/config/nginx/nginx.conf" >"/etc/nginx/nginx.conf"
     display --indent 6 --text "- Updating nginx.conf" --result "DONE" --color GREEN
 
     # mime.types
-    cat "${SFOLDER}/config/nginx/mime.types" >"/etc/nginx/mime.types"
+    cat "${BROLIT_MAIN_DIR}/config/nginx/mime.types" >"/etc/nginx/mime.types"
     display --indent 6 --text "- Updating mime.types" --result "DONE" --color GREEN
 
     #Test the validity of the nginx configuration
@@ -434,7 +434,7 @@ function nginx_configuration_test() {
 function nginx_new_default_server() {
 
     # New default nginx configuration
-    cat "${SFOLDER}/config/nginx/sites-available/default" >"/etc/nginx/sites-available/default"
+    cat "${BROLIT_MAIN_DIR}/config/nginx/sites-available/default" >"/etc/nginx/sites-available/default"
 
     # Log
     log_event "info" "Creating default nginx server..." "false"
@@ -499,8 +499,8 @@ function nginx_create_globals_config() {
     fi
 
     # Copy files
-    cp "${SFOLDER}/config/nginx/globals/security.conf" "/etc/nginx/globals/security.conf"
-    cp "${SFOLDER}/config/nginx/globals/wordpress_sec.conf" "/etc/nginx/globals/wordpress_sec.conf"
+    cp "${BROLIT_MAIN_DIR}/config/nginx/globals/security.conf" "/etc/nginx/globals/security.conf"
+    cp "${BROLIT_MAIN_DIR}/config/nginx/globals/wordpress_sec.conf" "/etc/nginx/globals/wordpress_sec.conf"
 
     display --indent 6 --text "- Creating nginx globals config" --result "DONE" --color GREEN
 

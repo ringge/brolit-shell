@@ -118,6 +118,6 @@ function rclone_download() {
     local remote_directory=$2
 
     # Download backup
-    rclone copy "${REMOTE_NAME}:${remote_directory}/${file_to_download}" "${TMP_DIR}" -P
+    rclone copy "${REMOTE_NAME}:${remote_directory}/${file_to_download}" "${BROLIT_TMP_DIR}" -P
 
 }

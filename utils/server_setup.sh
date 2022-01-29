@@ -133,7 +133,7 @@ function server_app_setup() {
 
     "monit")
 
-        if [[ ${PACKAGES_MONIT_CONFIG_STATUS} == "enabled" ]]; then
+        if [[ ${PACKAGES_MONIT_STATUS} == "enabled" ]]; then
             log_subsection "Monit Installer"
             package_install_if_not "monit"
             monit_configure
@@ -304,7 +304,7 @@ function server_setup() {
 
     fi
 
-    if [[ ${PACKAGES_MONIT_CONFIG_STATUS} == "enabled" ]]; then
+    if [[ ${PACKAGES_MONIT_STATUS} == "enabled" ]]; then
         package_install_if_not "monit"
         monit_configure
     fi

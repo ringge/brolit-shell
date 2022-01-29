@@ -309,14 +309,14 @@ function wp_ask_url_search_and_replace() {
         if [[ ${exitstatus} -eq 0 ]]; then
 
           # Create temporary folder for backups
-          if [[ ! -d "${TMP_DIR}/backups" ]]; then
-            mkdir "${TMP_DIR}/backups"
-            log_event "info" "Temp files directory created: ${TMP_DIR}/backups" "false"
+          if [[ ! -d "${BROLIT_TMP_DIR}/backups" ]]; then
+            mkdir "${BROLIT_TMP_DIR}/backups"
+            log_event "info" "Temp files directory created: ${BROLIT_TMP_DIR}/backups" "false"
           fi
 
           project_name="$(basename "${wp_path}")"
 
-          wpcli_export_database "${wp_path}" "${TMP_DIR}/backups/${project_name}_bk_before_search_and_replace.sql"
+          wpcli_export_database "${wp_path}" "${BROLIT_TMP_DIR}/backups/${project_name}_bk_before_search_and_replace.sql"
 
           wpcli_search_and_replace "${wp_path}" "${existing_URL}" "${new_URL}"
 

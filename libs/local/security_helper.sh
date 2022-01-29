@@ -41,7 +41,7 @@ function security_clamav_scan() {
   display --indent 6 --text "- Searching for malware"
   log_event "info" "Running clamscan on ${directory}" "false"
 
-  report_file="${SFOLDER}/reports/clamav-results-${timestamp}.log"
+  report_file="${BROLIT_MAIN_DIR}/reports/clamav-results-${timestamp}.log"
 
   # Run on specific directory with parameters:
   # -r recursive (Scan subdirectories recursively)

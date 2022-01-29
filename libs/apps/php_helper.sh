@@ -130,11 +130,11 @@ function php_reconfigure() {
   if [[ -z ${php_v} ]]; then php_v="${PHP_V}"; fi
 
   log_event "info" "Moving php.ini configuration file" "false"
-  cat "${SFOLDER}/config/php/php.ini" >"/etc/php/${php_v}/fpm/php.ini"
+  cat "${BROLIT_MAIN_DIR}/config/php/php.ini" >"/etc/php/${php_v}/fpm/php.ini"
   display --indent 6 --text "- Moving php.ini configuration file" --result "DONE" --color GREEN
 
   log_event "info" "Moving php-fpm.conf configuration file" "false"
-  cat "${SFOLDER}/config/php/php-fpm.conf" >"/etc/php/${php_v}/fpm/php-fpm.conf"
+  cat "${BROLIT_MAIN_DIR}/config/php/php-fpm.conf" >"/etc/php/${php_v}/fpm/php-fpm.conf"
   display --indent 6 --text "- Moving php-fpm.conf configuration file" --result "DONE" --color GREEN
 
   # Replace string to match PHP version

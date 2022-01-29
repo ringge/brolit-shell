@@ -5,14 +5,14 @@
 ################################################################################
 
 ### Main dir check
-SFOLDER=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-SFOLDER=$(cd "$(dirname "${SFOLDER}")" && pwd)
-if [ -z "${SFOLDER}" ]; then
+BROLIT_MAIN_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+BROLIT_MAIN_DIR=$(cd "$(dirname "${BROLIT_MAIN_DIR}")" && pwd)
+if [ -z "${BROLIT_MAIN_DIR}" ]; then
   exit 1 # error; the path is not accessible
 fi
 
-# shellcheck source=${SFOLDER}/libs/commons.sh
-source "${SFOLDER}/libs/commons.sh"
+# shellcheck source=${BROLIT_MAIN_DIR}/libs/commons.sh
+source "${BROLIT_MAIN_DIR}/libs/commons.sh"
 
 ################################################################################
 
@@ -87,15 +87,15 @@ for site in ${all_sites}; do
 done
 
 # Running scripts
-#"${SFOLDER}/utils/server_and_image_optimizations.sh"
+#"${BROLIT_MAIN_DIR}/utils/server_and_image_optimizations.sh"
 
-#DB_MAIL="${TMP_DIR}/db-bk-${NOW}.mail"
+#DB_MAIL="${BROLIT_TMP_DIR}/db-bk-${NOW}.mail"
 #DB_MAIL_VAR=$(<"${DB_MAIL}")
 
-#ONFIG_MAIL="${TMP_DIR}/config-bk-${NOW}.mail"
+#ONFIG_MAIL="${BROLIT_TMP_DIR}/config-bk-${NOW}.mail"
 #CONFIG_MAIL_VAR=$(<"${CONFIG_MAIL}")
 
-#FILE_MAIL="${TMP_DIR}/file-bk-${NOW}.mail"
+#FILE_MAIL="${BROLIT_TMP_DIR}/file-bk-${NOW}.mail"
 #FILE_MAIL_VAR=$(<"${FILE_MAIL}")
 
 #MAIL_FOOTER=$(mail_footer "${SCRIPT_V}")

@@ -23,19 +23,19 @@
 function _netdata_alerts_configuration() {
 
   # CPU
-  cp "${SFOLDER}/config/netdata/health.d/cpu.conf" "/etc/netdata/health.d/cpu.conf"
+  cp "${BROLIT_MAIN_DIR}/config/netdata/health.d/cpu.conf" "/etc/netdata/health.d/cpu.conf"
 
   # Web_log
-  cp "${SFOLDER}/config/netdata/health.d/web_log.conf" "/etc/netdata/health.d/web_log.conf"
+  cp "${BROLIT_MAIN_DIR}/config/netdata/health.d/web_log.conf" "/etc/netdata/health.d/web_log.conf"
 
   # MySQL
-  cp "${SFOLDER}/config/netdata/health.d/mysql.conf" "/etc/netdata/health.d/mysql.conf"
+  cp "${BROLIT_MAIN_DIR}/config/netdata/health.d/mysql.conf" "/etc/netdata/health.d/mysql.conf"
 
   # PHP-FPM
-  cp "${SFOLDER}/config/netdata/health.d/php-fpm.conf" "/etc/netdata/health.d/php-fpm.conf"
+  cp "${BROLIT_MAIN_DIR}/config/netdata/health.d/php-fpm.conf" "/etc/netdata/health.d/php-fpm.conf"
 
   # Anomalies
-  #cp "${SFOLDER}/config/netdata/health.d/anomalies.conf" "/etc/netdata/health.d/anomalies.conf"
+  #cp "${BROLIT_MAIN_DIR}/config/netdata/health.d/anomalies.conf" "/etc/netdata/health.d/anomalies.conf"
 
 }
 
@@ -348,34 +348,42 @@ EOF
 
 function netdata_configuration() {
 
-  # TODO: check if mysql or mariadb are installed
+  # Check if mysql or mariadb are enabled
+  if [[ ${PACKAGES_MARIADB_STATUS} == "enabled" ]] || [[ ${PACKAGES_MYSQL_STATUS} == "enabled" ]]; then
 
-  # MySQL
-  mysql_user_create "netdata" "" "localhost"
-  mysql_user_grant_privileges "netdata" "*" "localhost"
+    # Configure netdata
+    ## MySQL
+    mysql_user_create "netdata" "" "localhost"
+    mysql_user_grant_privileges "netdata" "*" "localhost"
 
-  # Copy mysql config
-  cat "${SFOLDER}/config/netdata/python.d/mysql.conf" >"/etc/netdata/python.d/mysql.conf"
+    ## Copy mysql config
+    cat "${BROLIT_MAIN_DIR}/config/netdata/python.d/mysql.conf" >"/etc/netdata/python.d/mysql.conf"
 
-  log_event "info" "MySQL config done!" "false"
-  display --indent 6 --text "- MySQL configuration" --result "DONE" --color GREEN
+    log_event "info" "MySQL config done!" "false"
+    display --indent 6 --text "- MySQL configuration" --result "DONE" --color GREEN
 
-  # TODO: check if monit is installed
+  fi
 
-  # Monit
-  cat "${SFOLDER}/config/netdata/python.d/monit.conf" >"/etc/netdata/python.d/monit.conf"
+  # Check if monit is installed
+  if [[ ${PACKAGES_MONIT_STATUS} == "enabled" ]]; then
 
-  log_event "info" "Monit config done!" "false"
-  display --indent 6 --text "- Monit configuration" --result "DONE" --color GREEN
+    # Configure netdata
+    ## Monit
+    cat "${BROLIT_MAIN_DIR}/config/netdata/python.d/monit.conf" >"/etc/netdata/python.d/monit.conf"
+
+    log_event "info" "Monit config done!" "false"
+    display --indent 6 --text "- Monit configuration" --result "DONE" --color GREEN
+
+  fi
 
   # Web log
-  cat "${SFOLDER}/config/netdata/python.d/web_log.conf" >"/etc/netdata/python.d/web_log.conf"
+  cat "${BROLIT_MAIN_DIR}/config/netdata/python.d/web_log.conf" >"/etc/netdata/python.d/web_log.conf"
 
   log_event "info" "Nginx Web Log config done!" "false"
   display --indent 6 --text "- Nginx Web Log configuration" --result "DONE" --color GREEN
 
   # Health alarm notify
-  cat "${SFOLDER}/config/netdata/health_alarm_notify.conf" >"/etc/netdata/health_alarm_notify.conf"
+  cat "${BROLIT_MAIN_DIR}/config/netdata/health_alarm_notify.conf" >"/etc/netdata/health_alarm_notify.conf"
 
   log_event "info" "Health alarm config done!" "false"
   display --indent 6 --text "- Health alarm configuration" --result "DONE" --color GREEN

@@ -13,7 +13,7 @@ function test_mail_certificates_section() {
 
     mail_certificates_section
 
-    CERT_MAIL="${TMP_DIR}/cert-${NOW}.mail"
+    CERT_MAIL="${BROLIT_TMP_DIR}/cert-${NOW}.mail"
     CERT_MAIL_VAR=$(<"${CERT_MAIL}")
 
     # Preparing email to send

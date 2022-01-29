@@ -12,7 +12,7 @@ function redis_installer() {
   systemctl enable redis-server.service
 
   # Creating config file
-  cp "${SFOLDER}/config/redis/redis.conf" "/etc/redis/redis.conf"
+  cp "${BROLIT_MAIN_DIR}/config/redis/redis.conf" "/etc/redis/redis.conf"
 
   # Service restart
   service redis-server restart
