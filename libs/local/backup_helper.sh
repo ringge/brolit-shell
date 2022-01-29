@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha1
+# Version: 3.2-alpha2
 #############################################################################
 #
 # Backup Helper: Perform backup actions.
@@ -495,15 +495,12 @@ function make_files_backup() {
 
   # New folder with $VPSNAME
   storage_create_dir "${VPSNAME}"
-  #dropbox_create_dir "${VPSNAME}"
 
   # New folder with $bk_type
   storage_create_dir "${VPSNAME}/${bk_type}"
-  #dropbox_create_dir "${VPSNAME}/${bk_type}"
 
   # New folder with $directory_to_backup (project folder)
   storage_create_dir "${VPSNAME}/${bk_type}/${directory_to_backup}"
-  #dropbox_create_dir "${VPSNAME}/${bk_type}/${directory_to_backup}"
 
   remote_path="${VPSNAME}/${bk_type}/${directory_to_backup}"
 
@@ -518,11 +515,9 @@ function make_files_backup() {
 
       # Upload backup
       storage_upload_backup "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
-      #dropbox_upload "${TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
       # Delete old backup from Dropbox
       storage_delete_backup "${remote_path}/${old_bk_file}"
-      #dropbox_delete "${remote_path}/${old_bk_file}"
 
       # Delete temp backup
       rm --force "${TMP_DIR}/${NOW}/${backup_file}"
