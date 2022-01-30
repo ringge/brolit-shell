@@ -509,12 +509,19 @@ function make_files_backup() {
 
   if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" || ${BACKUP_SFTP_STATUS} == "enabled" ]]; then
 
+    # Log
+    display --indent 6 --text "- Files backup for ${directory_to_backup}"
+    log_event "info" "Files backup for : ${directory_to_backup}" "false"
+
     # Compress backup
     backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${BROLIT_TMP_DIR}/${NOW}/${backup_file}")"
 
     # Check test result
     compress_result=$?
     if [[ ${compress_result} -eq 0 ]]; then
+
+      # Log
+      display --indent 6 --text "- Files backup for ${directory_to_backup}" --result "DONE" --color GREEN
 
       # Upload backup
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
@@ -537,6 +544,9 @@ function make_files_backup() {
       fi
 
     else
+
+      # Log
+      display --indent 6 --text "- Files backup for ${directory_to_backup}" --result "FAIL" --color RED
 
       return 1
 
@@ -656,7 +666,7 @@ function make_all_databases_backup() {
         # Upload backup
         upload_backup_to_dropbox "${database}" "database" "${database_backup_path}"
 
-        exitstatus$?
+        exitstatus=$?
         if [[ ${exitstatus} -eq 0 ]]; then
 
           # Delete old backup from Dropbox
