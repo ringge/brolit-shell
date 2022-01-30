@@ -247,10 +247,10 @@ function netdata_installer() {
     if [[ -x ${nginx_command} ]]; then
 
       # Netdata nginx proxy configuration
-      nginx_server_create "${PACKAGE_NETDATA_CONFIG_SUBDOMAIN}" "netdata" "single" ""
+      nginx_server_create "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" "netdata" "single" ""
 
       # Nginx Auth
-      nginx_generate_auth "${PACKAGES_NETDATA_CONFIG_USER}" "${PACKAGES_NETDATA_CONFIG_USER_PASS}"
+      nginx_generate_encrypted_auth "${PACKAGES_NETDATA_CONFIG_USER}" "${PACKAGES_NETDATA_CONFIG_USER_PASS}"
 
       # Confirm ROOT_DOMAIN
       root_domain="$(get_root_domain "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}")"

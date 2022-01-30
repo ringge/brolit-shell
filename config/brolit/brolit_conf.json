@@ -6,7 +6,7 @@
                 "debug": "true",
                 "quiet": "false",
                 "skip_test": "true",
-                "tmp_dir": "${BROLIT_MAIN_DIR}/tmp",
+                "tmp_dir": "tmp",
                 "check_packages": "false"
             }
         ]

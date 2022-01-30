@@ -560,11 +560,25 @@ function nginx_generate_encrypted_auth() {
     local user=$1
     local psw=$2
 
+    log_event "info" "Creating nginx encrypted authentication." "false"
+
     if [[ -z ${psw} ]]; then
         psw="$(openssl passwd -apr1)"
     fi
 
+    log_event "info" "User: ${user}" "false"
+    log_event "info" "Pass: ${psw}" "false"
+    log_event "info" "Saving auth data on: /etc/nginx/passwords" "false"
+
     printf "${user}:${psw}" >"/etc/nginx/passwords"
+
+    exitstatus=$?
+    if [[ ${exitstatus} -eq 1 ]]; then
+
+        log_event "error" "Something went wrong writing: /etc/nginx/passwords" "false"
+        return 1
+
+    fi
 
 }
 

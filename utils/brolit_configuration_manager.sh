@@ -923,11 +923,14 @@ function _brolit_configuration_load_netdata() {
     local server_config_file=$1
 
     # Globals
+    declare -g NETDATA
     declare -g PACKAGES_NETDATA_STATUS
     declare -g PACKAGES_NETDATA_CONFIG_SUBDOMAIN
     declare -g PACKAGES_NETDATA_CONFIG_USER
     declare -g PACKAGES_NETDATA_CONFIG_USER_PASS
     declare -g PACKAGES_NETDATA_CONFIG_ALARM_LEVEL
+
+    NETDATA="$(which netdata)"
 
     PACKAGES_NETDATA_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].status")"
 
@@ -944,9 +947,15 @@ function _brolit_configuration_load_netdata() {
             exit 1
         fi
 
-        # Checking if Netdata is installed
-        NETDATA="$(which netdata)"
+        # Checking if Netdata is not installed
         if [[ ! -x "${NETDATA}" ]]; then
+            menu_config_changes_detected "netdata" "true"
+        fi
+
+    else
+
+        # Checking if Netdata is installed
+        if [[ -x "${NETDATA}" ]]; then
             menu_config_changes_detected "netdata" "true"
         fi
 
