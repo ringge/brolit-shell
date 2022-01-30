@@ -162,7 +162,7 @@ function _netdata_telegram_config() {
   default_recipient_telegram="${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID}"
 
   # Choose the netdata alarm level
-  netdata_alarm_level="${PACKAGES_NETDATA_CONFIG_ALARM_LEVEL}"
+  netdata_alarm_level="${PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL}"
 
   log_event "debug" "Running: sed -i \"s/^\(DEFAULT_RECIPIENT_TELEGRAM\s*=\s*\).*\$/\1\"${default_recipient_telegram}|${netdata_alarm_level}\"/" $health_alarm_notify_conf\" "false"
 
@@ -272,12 +272,14 @@ function netdata_uninstaller() {
   # Deleting mysql user
   mysql_user_delete "netdata" "localhost"
 
-  # Search for netdata nginx server file
-  netdata_server_file="$(grep "proxy_pass http://127.0.0.1:19999/" /etc/nginx/sites-available/* | cut -d ":" -f1)"
-  netdata_server_file="$(basename "${netdata_server_file}")"
+  # Remove nginx server config files
 
-  # Deleting nginx server files
-  nginx_server_delete "${netdata_server_file}"
+  ## Search for netdata nginx server file
+  netdata_server_file="$(grep "proxy_pass http://127.0.0.1:19999/" /etc/nginx/sites-available/* | cut -d ":" -f1)"
+  netdata_server_file_name="$(basename "${netdata_server_file}")"
+
+  ## Deleting nginx server files
+  nginx_server_delete "${netdata_server_file_name}"
 
   # Deleting installation files
   rm --force --recursive "/etc/netdata"
@@ -297,14 +299,13 @@ function netdata_uninstaller() {
   rm --force "/etc/cron.daily/netdata-updater"
   rm --force "/etc/cron.d/netdata-updater"
 
-  # new config
-  config_file="/root/.brolit_conf.json"
-  config_field="SUPPORT.netdata[].status"
-  config_value="disable"
-  json_write_field "${config_file}" "${config_field}" "${config_value}"
+  # New config value
+  NETDATA_CONFIG_STATUS="disabled"
 
   log_event "info" "Netdata uninstalled." "false"
   display --indent 6 --text "- Uninstalling netdata" --result "DONE" --color GREEN
+
+  export NETDATA_CONFIG_STATUS
 
 }
 
@@ -382,9 +383,15 @@ function netdata_configuration() {
   # Anomalies
   #_netdata_anomalies_configuration
 
-  # Telegram
+  # Telegram notification status
   if [[ ${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS} == "enabled" ]]; then
+
+    # Telegram notification config
     _netdata_telegram_config
+
+    # Send test alarms to sysadmin
+    /usr/libexec/netdata/plugins.d/alarm-notify.sh test
+
   fi
 
   # Reload service

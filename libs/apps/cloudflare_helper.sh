@@ -568,28 +568,24 @@ function cloudflare_set_record() {
             -H "Content-Type: application/json" \
             --data "{\"type\":\"${record_type}\",\"name\":\"${record_name}\",\"content\":\"${cur_ip}\",\"ttl\":${ttl},\"priority\":10,\"proxied\":${proxy_status}}")"
 
-        exitstatus=$?
-        if [[ ${exitstatus} -eq 0 ]]; then
+        # Remove Cloudflare API garbage output
+        clear_previous_lines "4"
 
-            # Remove Cloudflare API garbage output
-            clear_previous_lines "4"
-
-            display --indent 6 --text "- Creating subdomain ${MAGENTA}${record_name}${ENDCOLOR}" --result "DONE" --color GREEN
-            log_event "info" "Subdomain ${record_name} added successfully" "false"
-            log_event "debug" "Command returned: ${update}" "false"
-
-            return 0
-
-        else
-
-            # Remove Cloudflare API garbage output
-            clear_previous_lines "4"
+        if [[ ${update} == *"\"success\":false"* || ${update} == "" ]]; then
 
             display --indent 6 --text "- Creating subdomain ${record_name}" --result "FAIL" --color RED
             log_event "error" "Error creating subdomain ${record_name}" "false"
             log_event "debug" "Command returned: ${update}" "false"
 
             return 1
+
+        else
+
+            display --indent 6 --text "- Creating subdomain ${MAGENTA}${record_name}${ENDCOLOR}" --result "DONE" --color GREEN
+            log_event "info" "Subdomain ${record_name} added successfully" "false"
+            log_event "debug" "Command returned: ${update}" "false"
+
+            return 0
 
         fi
 
@@ -605,6 +601,7 @@ function cloudflare_set_record() {
 #   $2 = ${domain}
 #   $3 = ${record_type} - valid values: A, AAAA, CNAME, HTTPS, TXT, SRV, LOC, MX, NS, SPF, CERT, DNSKEY, DS, NAPTR, SMIMEA, SSHFP, SVCB, TLSA, URI
 #   $4 = ${proxy_status} - true/false
+#   $5 = ${cur_ip}
 #
 # Outputs:
 #   0 if ok, 1 on error.
@@ -641,6 +638,24 @@ function cloudflare_update_record() {
 
         # Remove Cloudflare API garbage output
         clear_previous_lines "4"
+
+        if [[ ${update} == *"\"success\":false"* || ${update} == "" ]]; then
+
+            display --indent 6 --text "- Updating subdomain ${record_name}" --result "FAIL" --color RED
+            log_event "error" "Error updating subdomain ${record_name}" "false"
+            log_event "debug" "Command returned: ${update}" "false"
+
+            return 1
+
+        else
+
+            display --indent 6 --text "- Updating subdomain ${MAGENTA}${record_name}${ENDCOLOR}" --result "DONE" --color GREEN
+            log_event "info" "Subdomain ${record_name} updated successfully" "false"
+            log_event "debug" "Command returned: ${update}" "false"
+
+            return 0
+
+        fi
 
     fi
 

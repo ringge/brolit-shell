@@ -929,7 +929,7 @@ function _brolit_configuration_load_netdata() {
     declare -g PACKAGES_NETDATA_CONFIG_SUBDOMAIN
     declare -g PACKAGES_NETDATA_CONFIG_USER
     declare -g PACKAGES_NETDATA_CONFIG_USER_PASS
-    declare -g PACKAGES_NETDATA_CONFIG_ALARM_LEVEL
+    declare -g PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL
     declare -g PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS
     declare -g PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN
     declare -g PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID
@@ -943,8 +943,8 @@ function _brolit_configuration_load_netdata() {
         PACKAGES_NETDATA_CONFIG_SUBDOMAIN="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].config[].subdomain")"
         PACKAGES_NETDATA_CONFIG_USER="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].config[].user")"
         PACKAGES_NETDATA_CONFIG_USER_PASS="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].config[].user_pass")"
-        PACKAGES_NETDATA_CONFIG_ALARM_LEVEL="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].config[].alarm_level")"
 
+        PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].notifications[].alarm_level")"
         PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].notifications[].telegram[].status")"
 
         if [[ ${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS} == "enabled" ]]; then
@@ -961,7 +961,7 @@ function _brolit_configuration_load_netdata() {
         fi
 
         # Check if all required vars are set
-        if [[ -z "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_USER}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_USER_PASS}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_ALARM_LEVEL}" ]]; then
+        if [[ -z "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_USER}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_USER_PASS}" ]] || [[ -z "${PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL}" ]]; then
             log_event "error" "Missing required config vars for netdata support" "true"
             exit 1
         fi
@@ -980,7 +980,7 @@ function _brolit_configuration_load_netdata() {
 
     fi
 
-    export PACKAGES_NETDATA_STATUS PACKAGES_NETDATA_CONFIG_SUBDOMAIN PACKAGES_NETDATA_CONFIG_USER PACKAGES_NETDATA_CONFIG_USER_PASS PACKAGES_NETDATA_CONFIG_ALARM_LEVEL
+    export PACKAGES_NETDATA_STATUS PACKAGES_NETDATA_CONFIG_SUBDOMAIN PACKAGES_NETDATA_CONFIG_USER PACKAGES_NETDATA_CONFIG_USER_PASS PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL
     export PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID
 
 }

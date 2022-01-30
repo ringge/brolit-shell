@@ -562,23 +562,26 @@ function nginx_generate_encrypted_auth() {
 
     log_event "info" "Creating nginx encrypted authentication." "false"
 
-    if [[ -z ${psw} ]]; then
-        psw="$(openssl passwd -apr1)"
+    if [[ -n ${psw} ]]; then
+        encrypted_psw="$(openssl passwd -apr1 ${psw})"
     fi
 
     log_event "info" "User: ${user}" "false"
     log_event "info" "Pass: ${psw}" "false"
-    log_event "info" "Saving auth data on: /etc/nginx/passwords" "false"
+    log_event "info" "Encrypted Pass: ${encrypted_psw}" "false"
+    log_event "info" "Saving auth data on: /etc/nginx/.passwords" "false"
 
-    printf "${user}:${psw}" >"/etc/nginx/passwords"
+    printf "${user}:${encrypted_psw}" >"/etc/nginx/.passwords"
 
     exitstatus=$?
     if [[ ${exitstatus} -eq 1 ]]; then
 
-        log_event "error" "Something went wrong writing: /etc/nginx/passwords" "false"
+        log_event "error" "Something went wrong writing: /etc/nginx/.passwords" "false"
         return 1
 
     fi
+
+    chmod 640 "/etc/nginx/.passwords"
 
 }
 
