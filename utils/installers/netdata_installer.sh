@@ -132,9 +132,6 @@ function _netdata_telegram_config() {
 
   local netdata_alarm_level
   local health_alarm_notify_conf
-  local netdata_config_1_string
-  local netdata_config_2_string
-
   local delimiter
 
   # Telegram
@@ -150,64 +147,36 @@ function _netdata_telegram_config() {
   KEY="SEND_TELEGRAM"
   send_telegram="$(grep "^${KEY}${delimiter}" "${health_alarm_notify_conf}" | cut -f2- -d"${delimiter}")"
 
-  KEY="TELEGRAM_BOT_TOKEN"
+  KEY="NOTIFICATION_TELEGRAM_BOT_TOKEN"
   telegram_bot_token="$(grep "^${KEY}${delimiter}" "${health_alarm_notify_conf}" | cut -f2- -d"${delimiter}")"
 
   KEY="DEFAULT_RECIPIENT_TELEGRAM"
   default_recipient_telegram="$(grep "^${KEY}${delimiter}" "${health_alarm_notify_conf}" | cut -f2- -d"${delimiter}")"
 
-  netdata_config_1_string+="\n . \n"
-  netdata_config_1_string+=" Configure Telegram Notifications? You will need:\n"
-  netdata_config_1_string+=" 1) Get a bot token. Contact @BotFather (https://t.me/BotFather) and send the command /newbot.\n"
-  netdata_config_1_string+=" Follow the instructions and paste the token to access the HTTP API:\n"
+  telegram_bot_token="${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN}"
 
-  telegram_bot_token="$(whiptail --title "Netdata: Telegram Configuration" --inputbox "${netdata_config_1_string}" 15 60 3>&1 1>&2 2>&3)"
+  send_telegram="YES"
+  sed -i "s/^\(SEND_TELEGRAM\s*=\s*\).*\$/\1\"$send_telegram\"/" $health_alarm_notify_conf
+  sed -i "s/^\(NOTIFICATION_TELEGRAM_BOT_TOKEN\s*=\s*\).*\$/\1\"$telegram_bot_token\"/" $health_alarm_notify_conf
 
-  exitstatus=$?
-  if [[ ${exitstatus} -eq 0 ]]; then
+  default_recipient_telegram="${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID}"
 
-    send_telegram="YES"
-    sed -i "s/^\(SEND_TELEGRAM\s*=\s*\).*\$/\1\"$send_telegram\"/" $health_alarm_notify_conf
-    sed -i "s/^\(TELEGRAM_BOT_TOKEN\s*=\s*\).*\$/\1\"$telegram_bot_token\"/" $health_alarm_notify_conf
+  # Choose the netdata alarm level
+  netdata_alarm_level="${PACKAGES_NETDATA_CONFIG_ALARM_LEVEL}"
 
-    netdata_config_2_string+="\n . \n"
-    netdata_config_2_string+=" 2) Contact the @myidbot (https://t.me/myidbot) bot and send the command /getid to get \n"
-    netdata_config_2_string+=" your personal chat id or invite him into a group and issue the same command to get the group chat id.\n"
-    netdata_config_2_string+=" 3) Paste the ID here:\n"
+  log_event "debug" "Running: sed -i \"s/^\(DEFAULT_RECIPIENT_TELEGRAM\s*=\s*\).*\$/\1\"${default_recipient_telegram}|${netdata_alarm_level}\"/" $health_alarm_notify_conf\" "false"
 
-    default_recipient_telegram="$(whiptail --title "Netdata: Telegram Configuration" --inputbox "${netdata_config_2_string}" 15 60 3>&1 1>&2 2>&3)"
+  # Making changes on health_alarm_notify.conf
+  sed -i "s/^\(DEFAULT_RECIPIENT_TELEGRAM\s*=\s*\).*\$/\1\"${default_recipient_telegram}|${netdata_alarm_level}\"/" $health_alarm_notify_conf
 
-    exitstatus=$?
-    if [[ ${exitstatus} -eq 0 ]]; then
+  # Uncomment the clear_alarm_always='YES' parameter on health_alarm_notify.conf
+  if grep -q '^#.*clear_alarm_always' ${health_alarm_notify_conf}; then
 
-      # Choose the netdata alarm level
-      netdata_alarm_level="$(_netdata_alarm_level)"
-
-      log_event "debug" "Running: sed -i \"s/^\(DEFAULT_RECIPIENT_TELEGRAM\s*=\s*\).*\$/\1\"${default_recipient_telegram}|${netdata_alarm_level}\"/" $health_alarm_notify_conf\" "false"
-
-      # Making changes on health_alarm_notify.conf
-      sed -i "s/^\(DEFAULT_RECIPIENT_TELEGRAM\s*=\s*\).*\$/\1\"${default_recipient_telegram}|${netdata_alarm_level}\"/" $health_alarm_notify_conf
-
-      # Uncomment the clear_alarm_always='YES' parameter on health_alarm_notify.conf
-      if grep -q '^#.*clear_alarm_always' ${health_alarm_notify_conf}; then
-
-        sed -i '/^#.*clear_alarm_always/ s/^#//' $health_alarm_notify_conf
-
-      fi
-
-      display --indent 6 --text "- Telegram configuration" --result "DONE" --color GREEN
-
-    else
-
-      return 1
-
-    fi
-
-  else
-
-    return 1
+    sed -i '/^#.*clear_alarm_always/ s/^#//' $health_alarm_notify_conf
 
   fi
+
+  display --indent 6 --text "- Telegram configuration" --result "DONE" --color GREEN
 
 }
 
@@ -298,6 +267,8 @@ function netdata_uninstaller() {
   clear_previous_lines "2"
   log_event "warning" "Uninstalling Netdata ..." "false"
 
+  package_purge "netdata"
+
   # Deleting mysql user
   mysql_user_delete "netdata" "localhost"
 
@@ -310,13 +281,21 @@ function netdata_uninstaller() {
 
   # Deleting installation files
   rm --force --recursive "/etc/netdata"
-  rm --force "/etc/systemd/system/netdata.service"
   rm --force "/usr/sbin/netdata"
-
-  # Running uninstaller
-  if [[ -f "/usr/libexec/netdata-uninstaller.sh" ]]; then
-    source "/usr/libexec/netdata-uninstaller.sh" --yes --dont-wait
-  fi
+  rm --force "/etc/logrotate.d/netdata"
+  rm --force "/etc/systemd/system/netdata.service"
+  rm --force "/lib/systemd/system/netdata.service"
+  rm --force "/usr/lib/systemd/system/netdata.service"
+  rm --force "/etc/systemd/system/netdata-updater.service"
+  rm --force "/lib/systemd/system/netdata-updater.service"
+  rm --force "/usr/lib/systemd/system/netdata-updater.service"
+  rm --force "/etc/systemd/system/netdata-updater.timer"
+  rm --force "/lib/systemd/system/netdata-updater.timer"
+  rm --force "/usr/lib/systemd/system/netdata-updater.timer"
+  rm --force "/etc/init.d/netdata"
+  rm --force "/etc/periodic/daily/netdata-updater"
+  rm --force "/etc/cron.daily/netdata-updater"
+  rm --force "/etc/cron.d/netdata-updater"
 
   # new config
   config_file="/root/.brolit_conf.json"
@@ -324,7 +303,7 @@ function netdata_uninstaller() {
   config_value="disable"
   json_write_field "${config_file}" "${config_field}" "${config_value}"
 
-  log_event "info" "Netdata removed ok!" "false"
+  log_event "info" "Netdata uninstalled." "false"
   display --indent 6 --text "- Uninstalling netdata" --result "DONE" --color GREEN
 
 }
@@ -401,10 +380,12 @@ function netdata_configuration() {
   _netdata_alerts_configuration
 
   # Anomalies
-  _netdata_anomalies_configuration
+  #_netdata_anomalies_configuration
 
   # Telegram
-  _netdata_telegram_config
+  if [[ ${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS} == "enabled" ]]; then
+    _netdata_telegram_config
+  fi
 
   # Reload service
   systemctl daemon-reload && systemctl enable netdata && service netdata start
@@ -412,160 +393,5 @@ function netdata_configuration() {
   # Log
   log_event "info" "Netdata Configuration finished" "false"
   display --indent 6 --text "- Configuring netdata" --result "DONE" --color GREEN
-
-}
-
-################################################################################
-# Netdata installer menu
-#
-# Arguments:
-#  none
-#
-# Outputs:
-#  nothing
-################################################################################
-
-function netdata_installer_menu() {
-
-  local netdata_subdomain
-  local netdata_options
-  local netdata_chosen_option
-
-  # Checking if Netdata is installed
-  NETDATA="$(which netdata)"
-
-  if [[ ! -x "${NETDATA}" ]]; then
-
-    if [[ -z "${PACKAGE_NETDATA_CONFIG_SUBDOMAIN}" ]]; then
-
-      netdata_subdomain="$(whiptail --title "Netdata Installer" --inputbox "Please insert the subdomain you want to install Netdata. Ex: monitor.domain.com" 10 60 3>&1 1>&2 2>&3)"
-
-      exitstatus=$?
-      if [[ ${exitstatus} -eq 0 ]]; then
-
-        # new config
-        config_file="/root/.brolit_conf.json"
-
-        config_field="PACKAGE.netdata[].status"
-        config_value="enable"
-        json_write_field "${config_file}" "${config_field}" "${config_value}"
-
-        config_field="PACKAGE.netdata[].config[].subdomain"
-        config_value="${netdata_subdomain}"
-        json_write_field "${config_file}" "${config_field}" "${config_value}"
-
-      else
-
-        return 1
-
-      fi
-
-    fi
-
-    # Only for Cloudflare API
-    possible_root_domain="$(get_root_domain "${netdata_subdomain}")"
-
-    mysql_command="$(command -v mysql)"
-    if [[ -x ${mysql_command} ]]; then
-      mysql_ask_root_psw
-    fi
-
-    while true; do
-
-      echo -e "${YELLOW}${ITALIC} > Do you really want to install netdata?${ENDCOLOR}"
-      read -p "Please type 'y' or 'n'" yn
-
-      case $yn in
-
-      [Yy]*)
-
-        clear_previous_lines "2"
-
-        log_subsection "Netdata Installer"
-
-        log_event "info" "Updating packages before installation ..." "false"
-
-        # Update
-        apt-get --yes update -qq >/dev/null
-
-        display --indent 6 --text "- Updating packages before installation" --result "DONE" --color GREEN
-
-        # Install required packages
-        _netdata_required_packages
-
-        # Installe netdata
-        netdata_installer
-
-        # Configuration
-        netdata_configuration
-
-        # Confirm ROOT_DOMAIN
-        root_domain="$(ask_root_domain "${possible_root_domain}")"
-
-        # TODO: check if Cloudflare is enabled
-
-        # Cloudflare API
-        cloudflare_set_record "${root_domain}" "${netdata_subdomain}" "A"
-
-        # TODO: check if Certbot is enabled
-
-        # HTTPS with Certbot
-        certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${netdata_subdomain}"
-
-        display --indent 6 --text "- Netdata installation" --result "DONE" --color GREEN
-
-        break
-        ;;
-
-      [Nn]*)
-
-        log_event "warning" "Aborting netdata installer script ..." "true"
-        break
-        ;;
-
-      *) echo " > Please answer yes or no." ;;
-
-      esac
-
-    done
-
-  else
-
-    netdata_options=(
-      "01)" "UPDATE NETDATA"
-      "02)" "CONFIGURE NETDATA"
-      "03)" "UNINSTALL NETDATA"
-      "04)" "SEND ALARM TEST"
-    )
-
-    netdata_chosen_option="$(whiptail --title "Netdata Installer" --menu "Netdata is already installed." 20 78 10 "${netdata_options[@]}" 3>&1 1>&2 2>&3)"
-    exitstatus=$?
-    if [[ ${exitstatus} -eq 0 ]]; then
-
-      log_subsection "Netdata Installer"
-
-      if [[ ${netdata_chosen_option} == *"01"* ]]; then
-        cd netdata && git pull && ./netdata-installer.sh --dont-wait
-        netdata_configuration
-
-      fi
-      if [[ ${netdata_chosen_option} == *"02"* ]]; then
-        _netdata_required_packages
-        netdata_configuration
-
-      fi
-      if [[ ${netdata_chosen_option} == *"03"* ]]; then
-
-        netdata_uninstaller
-
-      fi
-      if [[ ${netdata_chosen_option} == *"04"* ]]; then
-        /usr/libexec/netdata/plugins.d/alarm-notify.sh test
-
-      fi
-
-    fi
-
-  fi
 
 }

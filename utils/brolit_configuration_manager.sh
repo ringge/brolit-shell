@@ -377,8 +377,8 @@ function _brolit_configuration_load_telegram() {
 
     if [[ ${NOTIFICATION_TELEGRAM_STATUS} == "enabled" ]]; then
 
-        NOTIFICATION_TELEGRAM_BOT_TOKEN="$(json_read_field "${server_config_file}" "NOTIFICATIONS.telegram[].config[].NOTIFICATION_TELEGRAM_BOT_TOKEN")"
-        NOTIFICATION_TELEGRAM_CHAT_ID="$(json_read_field "${server_config_file}" "NOTIFICATIONS.telegram[].config[].NOTIFICATION_TELEGRAM_CHAT_ID")"
+        NOTIFICATION_TELEGRAM_BOT_TOKEN="$(json_read_field "${server_config_file}" "NOTIFICATIONS.telegram[].config[].bot_token")"
+        NOTIFICATION_TELEGRAM_CHAT_ID="$(json_read_field "${server_config_file}" "NOTIFICATIONS.telegram[].config[].chat_id")"
 
         # Check if all required vars are set
         if [[ -z "${NOTIFICATION_TELEGRAM_BOT_TOKEN}" ]] || [[ -z "${NOTIFICATION_TELEGRAM_CHAT_ID}" ]]; then
@@ -929,6 +929,9 @@ function _brolit_configuration_load_netdata() {
     declare -g PACKAGES_NETDATA_CONFIG_USER
     declare -g PACKAGES_NETDATA_CONFIG_USER_PASS
     declare -g PACKAGES_NETDATA_CONFIG_ALARM_LEVEL
+    declare -g PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS
+    declare -g PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN
+    declare -g PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID
 
     NETDATA="$(which netdata)"
 
@@ -940,6 +943,21 @@ function _brolit_configuration_load_netdata() {
         PACKAGES_NETDATA_CONFIG_USER="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].config[].user")"
         PACKAGES_NETDATA_CONFIG_USER_PASS="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].config[].user_pass")"
         PACKAGES_NETDATA_CONFIG_ALARM_LEVEL="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].config[].alarm_level")"
+
+        PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].notifications[].telegram[].status")"
+
+        if [[ ${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS} == "enabled" ]]; then
+
+            PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].notifications[].telegram[].config[].bot_token")"
+            PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID="$(json_read_field "${server_config_file}" "PACKAGES.netdata[].notifications[].telegram[].config[].chat_id")"
+
+            # Check if all required vars are set
+            if [[ -z "${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN}" ]] || [[ -z "${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID}" ]]; then
+                log_event "error" "Missing required config vars for netdata notifications" "true"
+                exit 1
+            fi
+
+        fi
 
         # Check if all required vars are set
         if [[ -z "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_USER}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_USER_PASS}" ]] || [[ -z "${PACKAGES_NETDATA_CONFIG_ALARM_LEVEL}" ]]; then
@@ -962,6 +980,7 @@ function _brolit_configuration_load_netdata() {
     fi
 
     export PACKAGES_NETDATA_STATUS PACKAGES_NETDATA_CONFIG_SUBDOMAIN PACKAGES_NETDATA_CONFIG_USER PACKAGES_NETDATA_CONFIG_USER_PASS PACKAGES_NETDATA_CONFIG_ALARM_LEVEL
+    export PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID
 
 }
 

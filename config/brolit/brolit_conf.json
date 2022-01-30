@@ -2,7 +2,7 @@
     "BROLIT_SETUP": {
         "config": [
             {
-                "version": "3.7.2",
+                "version": "3.7.3",
                 "debug": "true",
                 "quiet": "false",
                 "skip_test": "true",
@@ -119,8 +119,8 @@
                 "status": "disabled",
                 "config": [
                     {
-                        "NOTIFICATION_TELEGRAM_BOT_TOKEN": "",
-                        "NOTIFICATION_TELEGRAM_CHAT_ID": ""
+                        "bot_token": "",
+                        "chat_id": ""
                     }
                 ]
             }
@@ -333,8 +333,24 @@
                     {
                         "subdomain": "",
                         "user": "",
-                        "user_pass": "",
-                        "alarm_level": ""
+                        "user_pass": ""
+                    }
+                ],
+                "notifications": [
+                    {
+                        "alarm_level": "",
+                        "maila": "",
+                        "telegram": [
+                            {
+                                "status": "disabled",
+                                "config": [
+                                    {
+                                        "bot_token": "",
+                                        "chat_id": ""
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }
