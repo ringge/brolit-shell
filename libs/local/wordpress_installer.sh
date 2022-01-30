@@ -140,10 +140,10 @@ function wordpress_project_install() {
   if [[ ${project_domain} == *"${common_subdomain}"* ]]; then
 
     # Cloudflare API to change DNS records
-    cloudflare_set_record "${project_root_domain}" "${project_root_domain}" "A" "${SERVER_IP}"
+    cloudflare_set_record "${project_root_domain}" "${project_root_domain}" "A" "false" "${SERVER_IP}"
 
     # Cloudflare API to change DNS records
-    cloudflare_set_record "${project_root_domain}" "${project_domain}" "CNAME" "${SERVER_IP}"
+    cloudflare_set_record "${project_root_domain}" "${project_domain}" "CNAME" "false" "${project_root_domain}"
 
     # New site Nginx configuration
     nginx_server_create "${project_domain}" "wordpress" "root_domain" "${project_root_domain}"
@@ -173,7 +173,7 @@ function wordpress_project_install() {
   else
 
     # Cloudflare API to change DNS records
-    cloudflare_set_record "${project_root_domain}" "${project_domain}" "A" "${SERVER_IP}"
+    cloudflare_set_record "${project_root_domain}" "${project_domain}" "A" "false" "${SERVER_IP}"
 
     # New site Nginx configuration
     nginx_create_empty_nginx_conf "${project_path}"
@@ -263,6 +263,8 @@ function wordpress_project_install() {
 # Outputs:
 #   0 if ok, 1 on error.
 ################################################################################
+
+# TODO: NEEDS REFACTOR
 
 function wordpress_project_copy() {
 
@@ -370,10 +372,10 @@ function wordpress_project_copy() {
   if [[ ${project_domain} == *"${common_subdomain}"* ]]; then
 
     # Cloudflare API to change DNS records
-    cloudflare_set_record "${root_domain}" "${root_domain}" "A" "${SERVER_IP}"
+    cloudflare_set_record "${root_domain}" "${root_domain}" "A" "false" "${SERVER_IP}"
 
     # Cloudflare API to change DNS records
-    cloudflare_set_record "${root_domain}" "${project_domain}" "CNAME" "${SERVER_IP}"
+    cloudflare_set_record "${root_domain}" "${project_domain}" "CNAME" "false" "${root_domain}"
 
     # New site Nginx configuration
     nginx_server_create "${project_domain}" "wordpress" "root_domain" "${root_domain}"
@@ -402,7 +404,7 @@ function wordpress_project_copy() {
   else
 
     # Cloudflare API to change DNS records
-    cloudflare_set_record "${root_domain}" "${project_domain}" "A" "${SERVER_IP}"
+    cloudflare_set_record "${root_domain}" "${project_domain}" "A" "false" "${SERVER_IP}"
 
     exitstatus=$?
     if [[ ${exitstatus} -eq 0 ]]; then

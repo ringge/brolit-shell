@@ -37,14 +37,14 @@ function _brolit_configuration_load_server_config() {
 
     UNATTENDED_UPGRADES="$(json_read_field "${server_config_file}" "SERVER_CONFIG.unattended_upgrades")"
     if [ -z "${UNATTENDED_UPGRADES}" ]; then
-        log_event "error" "Missing required config vars for server config" "true"
+        log_event "error" "Missing required config vars for server config." "true"
         exit 1
     fi
 
     if [ -z "${SERVER_ROLE_WEBSERVER}" ]; then
         SERVER_ROLE_WEBSERVER="$(json_read_field "${server_config_file}" "SERVER_CONFIG.config[].webserver")"
         if [ -z "${SERVER_ROLE_WEBSERVER}" ]; then
-            log_event "error" "Missing required config vars for server role" "true"
+            log_event "error" "Missing required config vars for server role." "true"
             exit 1
         fi
     fi
@@ -52,13 +52,14 @@ function _brolit_configuration_load_server_config() {
     if [ -z "${SERVER_ROLE_DATABASE}" ]; then
         SERVER_ROLE_DATABASE="$(json_read_field "${server_config_file}" "SERVER_CONFIG.config[].database")"
         if [ -z "${SERVER_ROLE_DATABASE}" ]; then
-            log_event "error" "Missing required config vars for server role" "true"
+            log_event "error" "Missing required config vars for server role." "true"
             exit 1
         fi
     fi
 
     if [[ ${SERVER_ROLE_WEBSERVER} != "enabled" ]] && [[ ${SERVER_ROLE_DATABASE} != "enabled" ]]; then
         log_event "error" "At least one server role need to be defined." "true"
+        log_event "error" "Please edit the file .brolit_conf.json and execute BROLIT again." "true"
         exit 1
     fi
 

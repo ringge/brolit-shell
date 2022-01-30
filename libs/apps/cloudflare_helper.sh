@@ -470,6 +470,7 @@ function cloudflare_get_record_details() {
 #   $2 = ${domain}
 #   $3 = ${record_type} - valid values: A, AAAA, CNAME, HTTPS, TXT, SRV, LOC, MX, NS, SPF, CERT, DNSKEY, DS, NAPTR, SMIMEA, SSHFP, SVCB, TLSA, URI
 #   $4 = ${proxy_status} - true/false
+#   $5 = ${cur_ip}
 #
 # Outputs:
 #   0 if ok, 1 on error.

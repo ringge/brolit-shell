@@ -227,7 +227,7 @@ function netdata_installer() {
       # TODO: check if Cloudflare is enabled
 
       # Cloudflare API
-      cloudflare_set_record "${root_domain}" "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" "A"
+      cloudflare_set_record "${root_domain}" "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" "A" "false" "${SERVER_IP}"
 
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
