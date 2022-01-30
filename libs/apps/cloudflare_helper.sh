@@ -555,9 +555,12 @@ function cloudflare_set_record() {
 
     else
 
+        # Log
         display --indent 6 --text "- Creating subdomain ${MAGENTA}${record_name}${ENDCOLOR}"
         log_event "debug" "Record ID not found. Trying to add the subdomain: ${record_name}"
+        log_event "debug" "Running: curl -X POST \"https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records\" -H \"X-Auth-Email: ${SUPPORT_CLOUDFLARE_EMAIL}\" -H \"X-Auth-Key: ${SUPPORT_CLOUDFLARE_API_KEY}\" -H \"Content-Type: application/json\" --data \"{\"type\":\"${record_type}\",\"name\":\"${record_name}\",\"content\":\"${cur_ip}\",\"ttl\":${ttl},\"priority\":10,\"proxied\":${proxy_status}}\""
 
+        # Command
         update="$(curl -X POST "https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records" \
             -H "X-Auth-Email: ${SUPPORT_CLOUDFLARE_EMAIL}" \
             -H "X-Auth-Key: ${SUPPORT_CLOUDFLARE_API_KEY}" \
@@ -572,6 +575,7 @@ function cloudflare_set_record() {
 
             display --indent 6 --text "- Creating subdomain ${MAGENTA}${record_name}${ENDCOLOR}" --result "DONE" --color GREEN
             log_event "info" "Subdomain ${record_name} added successfully" "false"
+            log_event "debug" "Command returned: ${update}" "false"
 
             return 0
 
@@ -582,7 +586,7 @@ function cloudflare_set_record() {
 
             display --indent 6 --text "- Creating subdomain ${record_name}" --result "FAIL" --color RED
             log_event "error" "Error creating subdomain ${record_name}" "false"
-            log_event "debug" "Last command executed: curl -X POST \"https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records\" -H \"X-Auth-Email: ${SUPPORT_CLOUDFLARE_EMAIL}\" -H \"X-Auth-Key: ${SUPPORT_CLOUDFLARE_API_KEY}\" -H \"Content-Type: application/json\" --data \"{\"type\":\"${record_type}\",\"name\":\"${record_name}\",\"content\":\"${cur_ip}\",\"ttl\":${ttl},\"priority\":10,\"proxied\":${proxy_status}}\""
+            log_event "debug" "Command returned: ${update}" "false"
 
             return 1
 
