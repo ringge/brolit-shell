@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha2
+# Version: 3.2-alpha3
 ################################################################################
 #
 # Netdata Installer
@@ -87,34 +87,46 @@ function _netdata_required_packages() {
 #  nothing
 ################################################################################
 
-function _netdata_alarm_level() {
+function _netdata_email_config() {
 
-  local netdata_alarm_levels
   local netdata_alarm_level
+  local health_alarm_notify_conf
+  local delimiter
 
-  netdata_alarm_levels="warning critical"
-  netdata_alarm_level=$(whiptail --title "NETDATA ALARM LEVEL" --menu "Choose the Alarm Level for Notifications" 20 78 10 "$(for x in ${netdata_alarm_levels}; do echo "$x [X]"; done)" 3>&1 1>&2 2>&3)
+  # Telegram
+  local send_email
+  local default_recipient_email
 
-  exitstatus=$?
-  if [[ ${exitstatus} -eq 0 ]]; then
+  # Netdata health alarms config
+  health_alarm_notify_conf="/etc/netdata/health_alarm_notify.conf"
 
-    # Brolit config
-    config_file="/root/.brolit_conf.json"
+  delimiter="="
 
-    config_field="SUPPORT.netdata[].config[].netdata_alarm_level"
-    config_value="${netdata_alarm_level}"
+  KEY="SEND_EMAIL"
+  send_email="$(grep "^${KEY}${delimiter}" "${health_alarm_notify_conf}" | cut -f2- -d"${delimiter}")"
 
-    json_write_field "${config_file}" "${config_field}" "${config_value}"
+  KEY="DEFAULT_RECIPIENT_EMAIL"
+  default_recipient_email="$(grep "^${KEY}${delimiter}" "${health_alarm_notify_conf}" | cut -f2- -d"${delimiter}")"
 
-    log_event "info" "Alarm Level for Notifications: ${netdata_alarm_level}" "false"
+  send_email="YES"
+  sed -i "s/^\(SEND_EMAIL\s*=\s*\).*\$/\1\"$send_email\"/" $health_alarm_notify_conf
 
-    echo "${netdata_alarm_level}"
+  default_recipient_email="${PACKAGES_NETDATA_NOTIFICATION_MAILA}"
 
-  else
+  # Choose the netdata alarm level
+  netdata_alarm_level="${PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL}"
 
-    return 1
+  # Making changes on health_alarm_notify.conf
+  sed -i "s/^\(DEFAULT_RECIPIENT_EMAIL\s*=\s*\).*\$/\1\"${default_recipient_email}|${netdata_alarm_level}\"/" $health_alarm_notify_conf
+
+  # Uncomment the clear_alarm_always='YES' parameter on health_alarm_notify.conf
+  if grep -q '^#.*clear_alarm_always' ${health_alarm_notify_conf}; then
+
+    sed -i '/^#.*clear_alarm_always/ s/^#//' $health_alarm_notify_conf
 
   fi
+
+  display --indent 6 --text "- Telegram configuration" --result "DONE" --color GREEN
 
 }
 
@@ -147,7 +159,7 @@ function _netdata_telegram_config() {
   KEY="SEND_TELEGRAM"
   send_telegram="$(grep "^${KEY}${delimiter}" "${health_alarm_notify_conf}" | cut -f2- -d"${delimiter}")"
 
-  KEY="NOTIFICATION_TELEGRAM_BOT_TOKEN"
+  KEY="TELEGRAM_BOT_TOKEN"
   telegram_bot_token="$(grep "^${KEY}${delimiter}" "${health_alarm_notify_conf}" | cut -f2- -d"${delimiter}")"
 
   KEY="DEFAULT_RECIPIENT_TELEGRAM"
@@ -163,8 +175,6 @@ function _netdata_telegram_config() {
 
   # Choose the netdata alarm level
   netdata_alarm_level="${PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL}"
-
-  log_event "debug" "Running: sed -i \"s/^\(DEFAULT_RECIPIENT_TELEGRAM\s*=\s*\).*\$/\1\"${default_recipient_telegram}|${netdata_alarm_level}\"/" $health_alarm_notify_conf\" "false"
 
   # Making changes on health_alarm_notify.conf
   sed -i "s/^\(DEFAULT_RECIPIENT_TELEGRAM\s*=\s*\).*\$/\1\"${default_recipient_telegram}|${netdata_alarm_level}\"/" $health_alarm_notify_conf
@@ -340,7 +350,6 @@ function netdata_configuration() {
   # Check if mysql or mariadb are enabled
   if [[ ${PACKAGES_MARIADB_STATUS} == "enabled" ]] || [[ ${PACKAGES_MYSQL_STATUS} == "enabled" ]]; then
 
-    # Configure netdata
     ## MySQL
     mysql_user_create "netdata" "" "localhost"
     mysql_user_grant_privileges "netdata" "*" "localhost"
@@ -356,11 +365,11 @@ function netdata_configuration() {
   # Check if monit is installed
   if [[ ${PACKAGES_MONIT_STATUS} == "enabled" ]]; then
 
-    # Configure netdata
     ## Monit
     cat "${BROLIT_MAIN_DIR}/config/netdata/python.d/monit.conf" >"/etc/netdata/python.d/monit.conf"
 
-    log_event "info" "Monit config done!" "false"
+    ## Log
+    log_event "info" "Monit configuration for netdata done." "false"
     display --indent 6 --text "- Monit configuration" --result "DONE" --color GREEN
 
   fi
@@ -380,8 +389,7 @@ function netdata_configuration() {
   # Alerts
   _netdata_alerts_configuration
 
-  # Anomalies
-  #_netdata_anomalies_configuration
+  _netdata_email_config
 
   # Telegram notification status
   if [[ ${PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS} == "enabled" ]]; then
@@ -393,6 +401,9 @@ function netdata_configuration() {
     /usr/libexec/netdata/plugins.d/alarm-notify.sh test
 
   fi
+
+  # Anomalies
+  #_netdata_anomalies_configuration
 
   # Reload service
   systemctl daemon-reload && systemctl enable netdata && service netdata start

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha2
+# Version: 3.2-alpha3
 ################################################################################
 
 # Server Name
@@ -34,8 +34,8 @@ if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" && -f ${DPU_CONFIG_FILE} ]]; then
 fi
 
 # Version
-SCRIPT_VERSION="3.2-alpha2"
-ALIASES_VERSION="3.2-alpha2-088"
+SCRIPT_VERSION="3.2-alpha3"
+ALIASES_VERSION="3.2-alpha3-088"
 
 ################################################################################
 

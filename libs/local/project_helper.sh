@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha2
+# Version: 3.2-alpha3
 ################################################################################
 #
 # Project Helper: Perform project actions.

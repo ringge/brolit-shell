@@ -28,13 +28,13 @@
 
 ### Need more testing
 
-- [ ] Nginx: Add http2 support on nginx server config files.
+- [ ] Core: Let configure temp. backup directory.
 - [ ] Nginx: Globals configs support.
 - [ ] PHP: Option to enable or disable OpCache.
 
 ### In Progress
 
-- [ ] Core: ufw support.
+- [ ] Core: Prevent execute the script more than once at a time (maybe a .lock file?).
 - [ ] Core: Stop netdata alerts when a backup or virus analysis is started.
 - [ ] Core: Generate project config file (/etc/brolit/domain_conf.json).
 - [ ] Core: Flags should receive a json file to deploy or restore a new project.
@@ -47,10 +47,11 @@
 
 ## For release 3.3
 
-- [ ] Core: fail2ban support.
+- [ ] Core: Implementation of brolit_project.js (to read and deploy).
+- [ ] Core: Extend ufw support.
+- [ ] Core: Extend fail2ban support.
 - [ ] Core: composer support.
 - [ ] Core: node.js support.
-- [ ] Core: Let configure temp. backup directory.
 - [ ] Core: Docker support (deploy, backup, restore, delete, list containers, status).
         https://github.com/urre/wordpress-nginx-docker-compose
         https://serverfault.com/questions/1009841/backup-of-dockerized-wordpress
@@ -66,6 +67,7 @@
 - [ ] Restore: Refactor function restore_config_files_from_dropbox.
 - [ ] Nginx: Multidomain support for nginx.
 - [ ] MySQL: Rename database (with and without WP).
+- [ ] PHP: php_reconfigure refactor (replace strings instead of replace entired config files).
 - [ ] Nginx: Add IPv6 support: https://geekflare.com/es/enable-ipv6-nginx-apache/
 - [ ] Nginx: Better nginx config. 
         Ref https://www.digitalocean.com/community/tools/nginx
@@ -75,7 +77,6 @@
 - [ ] Core: Podman support.
 - [ ] Core: Git deployment support.
 - [ ] Core: Resolve small "TODOs" comments on the project.
-- [ ] Core: Prevent execute the script more than once at a time (maybe a .lock file?).
 - [ ] Core: Add support to create projects with a database on different server.
         https://www.digitalocean.com/community/tutorials/automating-the-deployment-of-a-scalable-wordpress-site
         https://spinupwp.com/scaling-wordpress-dedicated-database-server/
@@ -96,7 +97,6 @@
 
 ## For release 3.5
 
-- [ ] PHP: php_reconfigure refactor (replace strings instead of replace entired config files).
 - [ ] WordPress: Fallback for replace strings on wp database (if wp-cli fails, use old script version).
 - [ ] Wordpress: When restore or create a project on PROD state, ask if want to run "wpcli_run_startup_script"
 - [ ] Installers: Refactor of WORDPRESS_INSTALLER - COPY_FROM_PROJECT
@@ -138,10 +138,10 @@
 
 - [ ] Teleport support.
 - [ ] HTTP/2 Monitor Dashboard.
-- [ ] Netdata notifications Discord support.
 - [ ] Uptime Kuma support: 
         https://github.com/louislam/uptime-kuma
 - [ ] WordPress: WP Network support (nginx config, and wp-cli commands).
+- [ ] Netdata notifications Discord support.
 - [ ] Support for borgmatic?: https://github.com/witten/borgmatic
 - [ ] Core: Accept command via Telegram: https://github.com/topkecleon/telegram-bot-bash
 - [ ] Nginx: bad bot blocker.
