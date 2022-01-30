@@ -255,13 +255,22 @@ function netdata_installer() {
       # Confirm ROOT_DOMAIN
       root_domain="$(get_root_domain "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}")"
 
+      # TODO: check if Cloudflare is enabled
+
       # Cloudflare API
-      cloudflare_set_record "${possible_root_domain}" "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" "A"
+      cloudflare_set_record "${root_domain}" "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}" "A"
 
-      # HTTPS with Certbot
-      certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}"
+      exitstatus=$?
+      if [[ ${exitstatus} -eq 0 ]]; then
 
-      display --indent 6 --text "- Netdata installation" --result "DONE" --color GREEN
+        # TODO: check if Certbot is enabled
+
+        # HTTPS with Certbot
+        certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${PACKAGES_NETDATA_CONFIG_SUBDOMAIN}"
+
+        display --indent 6 --text "- Netdata installation" --result "DONE" --color GREEN
+
+      fi
 
     fi
 
@@ -493,8 +502,12 @@ function netdata_installer_menu() {
         # Confirm ROOT_DOMAIN
         root_domain="$(ask_root_domain "${possible_root_domain}")"
 
+        # TODO: check if Cloudflare is enabled
+
         # Cloudflare API
         cloudflare_set_record "${root_domain}" "${netdata_subdomain}" "A"
+
+        # TODO: check if Certbot is enabled
 
         # HTTPS with Certbot
         certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${netdata_subdomain}"

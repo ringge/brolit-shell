@@ -102,8 +102,12 @@ function get_root_domain() {
 
     root_domain=${domain_no_ext##*.}${domain_extension}
 
+    log_event "debug" "root_domain=${root_domain}" "false"
+
     # Return
     echo "${root_domain}"
+
+    return 0
 
   else
 

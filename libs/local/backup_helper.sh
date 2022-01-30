@@ -89,29 +89,32 @@ function make_server_files_backup() {
 
       # New folder with $VPSNAME
       storage_create_dir "${VPSNAME}"
-      #dropbox_create_dir "${VPSNAME}"
 
       # New folder with $bk_type
       storage_create_dir "${VPSNAME}/${bk_type}"
-      #dropbox_create_dir "${VPSNAME}/${bk_type}"
 
       # New folder with $bk_sup_type (php, nginx, mysql)
       storage_create_dir "${VPSNAME}/${bk_type}/${bk_sup_type}"
-      #dropbox_create_dir "${VPSNAME}/${bk_type}/${bk_sup_type}"
 
       # Remote Path
       remote_path="${VPSNAME}/${bk_type}/${bk_sup_type}"
 
       # Uploading backup files
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
-      #dropbox_upload "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
-      # Deleting old backup files
-      storage_delete_backup "${remote_path}/${old_bk_file}"
-      #dropbox_delete "${remote_path}/${old_bk_file}"
+      exitstatus$?
+      if [[ ${exitstatus} -eq 0 ]]; then
 
-      # Return
-      echo "${backup_file_size}"
+        # Deleting old backup file
+        storage_delete_backup "${remote_path}/${old_bk_file}"
+
+        # Deleting tmp backup file
+        rm --force "${BROLIT_TMP_DIR}/${NOW}/${backup_file}"
+
+        # Return
+        echo "${backup_file_size}"
+
+      fi
 
     else
 
@@ -516,18 +519,22 @@ function make_files_backup() {
       # Upload backup
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
-      # Delete old backup from Dropbox
-      storage_delete_backup "${remote_path}/${old_bk_file}"
+      exitstatus$?
+      if [[ ${exitstatus} -eq 0 ]]; then
 
-      # Delete temp backup
-      rm --force "${BROLIT_TMP_DIR}/${NOW}/${backup_file}"
+        # Delete old backup from Dropbox
+        storage_delete_backup "${remote_path}/${old_bk_file}"
 
-      # Log
-      log_event "info" "Temp backup deleted from server" "false"
-      #display --indent 6 --text "- Deleting temp files" --result "DONE" --color GREEN
+        # Delete temp backup
+        rm --force "${BROLIT_TMP_DIR}/${NOW}/${backup_file}"
 
-      # Return
-      echo "${backup_file_size}"
+        # Log
+        log_event "info" "Temp backup deleted from server" "false"
+
+        # Return
+        echo "${backup_file_size}"
+
+      fi
 
     else
 
@@ -649,6 +656,23 @@ function make_all_databases_backup() {
         # Upload backup
         upload_backup_to_dropbox "${database}" "database" "${database_backup_path}"
 
+        exitstatus$?
+        if [[ ${exitstatus} -eq 0 ]]; then
+
+          # Delete old backup from Dropbox
+          #storage_delete_backup "${remote_path}/${old_bk_file}"
+
+          # Delete temp backup
+          rm --force "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path}"
+
+          # Log
+          log_event "info" "Temp backup deleted from server." "false"
+
+          # Return
+          echo "${backup_file_size}"
+
+        fi
+
         database_backup_index=$((database_backup_index + 1))
 
         log_event "info" "Backup ${database_backup_index} of ${total_databases} done" "false"
@@ -719,6 +743,8 @@ function make_database_backup() {
     # Check test result
     compress_result=$?
     if [[ ${compress_result} -eq 0 ]]; then
+
+      rm --force "${directory_to_backup}/${db_file}"
 
       # Return
       ## backupfile backup_file_size
