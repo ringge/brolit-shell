@@ -1089,7 +1089,7 @@ function project_delete_database() {
     ${DROPBOX_UPLOADER} move "/${VPSNAME}/${BK_TYPE}/${chosen_database}" "/${VPSNAME}/offline-site" 1>&2
 
     # Log
-    clear_previous_lines "1"
+    clear_previous_lines "3"
     log_event "debug" "Running: dropbox_uploader.sh move ${VPSNAME}/${BK_TYPE}/${chosen_database} /${VPSNAME}/offline-site" "false"
     display --indent 6 --text "- Moving dropbox backup to offline directory" --result "DONE" --color GREEN
 

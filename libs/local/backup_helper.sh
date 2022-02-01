@@ -526,7 +526,7 @@ function make_files_backup() {
       # Upload backup
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
-      exitstatus$?
+      exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
         # Delete old backup from Dropbox
