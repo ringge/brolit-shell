@@ -1223,9 +1223,12 @@ function project_delete() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
-        # Delete Cloudflare entries
-        root_domain="$(get_root_domain "${project_domain}")"
-        cloudflare_delete_record "${root_domain}" "${project_domain}" "A"
+        if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
+          # Delete Cloudflare entries
+          root_domain="$(get_root_domain "${project_domain}")"
+          cloudflare_delete_record "${root_domain}" "${project_domain}" "A"
+
+        fi
 
       else
 
@@ -1235,9 +1238,12 @@ function project_delete() {
 
     else
 
-      # Delete Cloudflare entries
-      root_domain="$(get_root_domain "${project_domain}")"
-      cloudflare_delete_record "${root_domain}" "${project_domain}" "A"
+      if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
+        # Delete Cloudflare entries
+        root_domain="$(get_root_domain "${project_domain}")"
+        cloudflare_delete_record "${root_domain}" "${project_domain}" "A"
+
+      fi
 
     fi
 
@@ -1361,14 +1367,7 @@ function php_project_installer() {
 
   log_subsection "PHP Project Install"
 
-  if [[ ${project_root_domain} == '' ]]; then
-
-    possible_root_domain="$(get_root_domain "${project_domain}")"
-    project_root_domain="$(cloudflare_ask_rootdomain "${possible_root_domain}")"
-
-  fi
-
-  if [[ ! -d "${project_path}" ]]; then
+  if [[ ! -d ${project_path} ]]; then
     # Download WP
     mkdir "${project_path}"
     change_ownership "www-data" "www-data" "${project_path}"
@@ -1381,7 +1380,7 @@ function php_project_installer() {
     # Log
     display --indent 6 --text "- Creating PHP project" --result "FAIL" --color RED
     display --indent 8 --text "Destination folder '${project_path}' already exist"
-    log_event "error" "Destination folder '${project_path}' already exist, aborting ..."
+    log_event "error" "Destination folder '${project_path}' already exist, aborting ..." "false"
 
     # Return
     return 1
@@ -1408,6 +1407,12 @@ function php_project_installer() {
   change_ownership "www-data" "www-data" "${project_path}"
 
   # TODO: ask for Cloudflare support and check if root_domain is configured on the cf account
+    if [[ ${project_root_domain} == '' ]]; then
+
+    possible_root_domain="$(get_root_domain "${project_domain}")"
+    project_root_domain="$(cloudflare_ask_rootdomain "${possible_root_domain}")"
+
+  fi
 
   # If domain contains www, should work without www too
   common_subdomain='www'

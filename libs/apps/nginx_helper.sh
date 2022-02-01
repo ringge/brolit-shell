@@ -80,8 +80,16 @@ function nginx_server_create() {
         # Copy config from template file
         cp "${BROLIT_MAIN_DIR}/config/nginx/sites-available/${project_type}_${server_type}" "${nginx_server_file}"
 
+        # -L returns true if the "file" exists and is a symbolic link
+        if [[ -L ${nginx_server_file_link} ]]; then
+
+            # Remove previous symbolic link
+            rm "${nginx_server_file_link}"
+
+        fi
+
         # Creating symbolic link
-        ln -s "${nginx_server_file}" "${nginx_server_file_link}"
+            ln -s "${nginx_server_file}" "${nginx_server_file_link}"
 
         # Search and replace root_domain.com string with correct redirect_domains (must be root_domain here)
         sed -i "s/root_domain.com/${redirect_domains}/g" "${nginx_server_file}"

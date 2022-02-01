@@ -277,6 +277,9 @@ function netdata_uninstaller() {
   clear_previous_lines "2"
   log_event "warning" "Uninstalling Netdata ..." "false"
 
+  # Stop netdata service
+  service netdata stop
+
   package_purge "netdata"
 
   # Deleting mysql user

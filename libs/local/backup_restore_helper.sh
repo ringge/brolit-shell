@@ -413,11 +413,15 @@ function restore_backup_from_public_url() {
   # Get server IP
   #IP=$(dig +short myip.opendns.com @resolver1.opendns.com) 2>/dev/null
 
-  # TODO: Ask for subdomains to change in Cloudflare (root domain asked before)
-  # SUGGEST "${project_domain}" and "www${project_domain}"
+  if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
 
-  # Cloudflare API to change DNS records
-  cloudflare_set_record "${root_domain}" "${project_domain}" "A" "false" "${SERVER_IP}"
+    # TODO: Ask for subdomains to change in Cloudflare (root domain asked before)
+    # SUGGEST "${project_domain}" and "www${project_domain}"
+
+    # Cloudflare API to change DNS records
+    cloudflare_set_record "${root_domain}" "${project_domain}" "A" "false" "${SERVER_IP}"
+
+  fi
 
   # HTTPS with Certbot
   certbot_helper_installer_menu "${NOTIFICATION_EMAIL_MAILA}" "${project_domain}"
@@ -1309,9 +1313,13 @@ function restore_project() {
       # Nginx config
       nginx_server_create "www.${root_domain}" "${project_type}" "root_domain" "${root_domain}"
 
-      # Cloudflare API
-      # TODO: must check for CNAME with www
-      cloudflare_set_record "${root_domain}" "${root_domain}" "A" "false" "${SERVER_IP}"
+      if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
+
+        # Cloudflare API
+        # TODO: must check for CNAME with www
+        cloudflare_set_record "${root_domain}" "${root_domain}" "A" "false" "${SERVER_IP}"
+
+      fi
 
       # Let's Encrypt
       certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${root_domain},www.${root_domain}"
@@ -1330,8 +1338,12 @@ function restore_project() {
       # Nginx config
       nginx_server_create "${new_project_domain}" "${project_type}" "single"
 
-      # Cloudflare API
-      cloudflare_set_record "${root_domain}" "${new_project_domain}" "A" "false" "${SERVER_IP}"
+      if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
+
+        # Cloudflare API
+        cloudflare_set_record "${root_domain}" "${new_project_domain}" "A" "false" "${SERVER_IP}"
+
+      fi
 
       # Let's Encrypt
       certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${new_project_domain}"

@@ -821,6 +821,8 @@ function _brolit_configuration_load_certbot() {
 
     PACKAGES_CERTBOT_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.certbot[].status")"
 
+    CERTBOT="$(which certbot)"
+
     if [[ ${PACKAGES_CERTBOT_STATUS} == "enabled" ]]; then
 
         PACKAGES_CERTBOT_CONFIG_MAILA="$(json_read_field "${server_config_file}" "PACKAGES.certbot[].config[].email")"
@@ -831,15 +833,17 @@ function _brolit_configuration_load_certbot() {
             exit 1
         fi
 
-        package_is_installed "certbot"
-        exitstatus=$?
-        if [[ exitstatus -eq 1 ]]; then
-
+        # Checking if Certbot is not installed
+        if [[ ! -x "${CERTBOT}" ]]; then
             menu_config_changes_detected "certbot" "true"
-
         fi
 
     else
+
+        # Checking if Certbot is  installed
+        if [[ -x "${CERTBOT}" ]]; then
+            menu_config_changes_detected "certbot" "true"
+        fi
 
         display --indent 2 --text "- Certbot disabled" --result "WARNING" --color YELLOW
 
@@ -869,6 +873,8 @@ function _brolit_configuration_load_monit() {
 
     PACKAGES_MONIT_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.monit[].status")"
 
+    MONIT="$(which monit)"
+
     if [[ ${PACKAGES_MONIT_STATUS} == "enabled" ]]; then
 
         PACKAGES_MONIT_CONFIG_MAILA="$(json_read_field "${server_config_file}" "PACKAGES.monit[].config[].monit_maila")"
@@ -895,12 +901,16 @@ function _brolit_configuration_load_monit() {
             exit 1
         fi
 
-        package_is_installed "monit"
-        exitstatus=$?
-        if [[ exitstatus -eq 1 ]]; then
-
+        # Checking if Monit is not installed
+        if [[ ! -x "${MONIT}" ]]; then
             menu_config_changes_detected "monit" "true"
+        fi
 
+    else
+
+        # Checking if Monit is installed
+        if [[ -x "${MONIT}" ]]; then
+            menu_config_changes_detected "monit" "true"
         fi
 
     fi
@@ -1008,6 +1018,8 @@ function _brolit_configuration_load_grafana() {
 
     PACKAGES_GRAFANA_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.grafana[].status")"
 
+    GRAFANA="$(which grafana)"
+
     if [[ ${PACKAGES_GRAFANA_STATUS} == "enabled" ]]; then
 
         #PACKAGES_GRAFANA_CONFIG_SUBDOMAIN="$(json_read_field "${server_config_file}" "PACKAGES.grafana[].config[].subdomain")"
@@ -1021,10 +1033,22 @@ function _brolit_configuration_load_grafana() {
         #fi
 
         # Checking if Grafana is installed
-        package_is_installed "grafana"
+        #package_is_installed "grafana"
 
-        exitstatus=$?
-        if [[ ${exitstatus} -eq 1 ]]; then
+        #exitstatus=$?
+        #if [[ ${exitstatus} -eq 1 ]]; then
+        #    menu_config_changes_detected "grafana" "true"
+        #fi
+
+        # Checking if Grafana is not installed
+        if [[ ! -x "${GRAFANA}" ]]; then
+            menu_config_changes_detected "grafana" "true"
+        fi
+
+    else
+
+        # Checking if Grafana is installed
+        if [[ -x "${GRAFANA}" ]]; then
             menu_config_changes_detected "grafana" "true"
         fi
 
@@ -1299,12 +1323,17 @@ function brolit_configuration_setup_check() {
         fi
     fi
     # Check if is already defined
-    if [ -z "${BROLIT_TMP_DIR}" ]; then
+    if [[ -z ${BROLIT_TMP_DIR} ]]; then
         BROLIT_TMP_DIR="$(json_read_field "${server_config_file}" "BROLIT_SETUP.config[].tmp_dir")"
 
-        if [ -z "${BROLIT_TMP_DIR}" ]; then
+        if [[ -z ${BROLIT_TMP_DIR} ]]; then
             echo "Missing required config vars"
             exit 1
+        fi
+
+        # Check if $BROLIT_TMP_DIR starts with "/"
+        if [[ ${BROLIT_TMP_DIR} = '/'* ]]; then
+            BROLIT_TMP_DIR="${BROLIT_MAIN_DIR}/${BROLIT_TMP_DIR}"
         fi
 
         # Creating temporary folders
