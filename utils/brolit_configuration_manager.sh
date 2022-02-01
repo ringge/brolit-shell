@@ -1332,7 +1332,7 @@ function brolit_configuration_setup_check() {
         fi
 
         # Check if $BROLIT_TMP_DIR starts with "/"
-        if [[ ${BROLIT_TMP_DIR} = '/'* ]]; then
+        if [[ ${BROLIT_TMP_DIR} != '/'* ]]; then
             BROLIT_TMP_DIR="${BROLIT_MAIN_DIR}/${BROLIT_TMP_DIR}"
         fi
 
