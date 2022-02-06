@@ -1136,7 +1136,7 @@ function restore_project() {
   log_section "Restore Project Backup"
 
   # Get dropbox folders list
-  dropbox_project_list="$(${DROPBOX_UPLOADER} -hq list "${chosen_server}/project-${chosen_status}/site" | awk '{print $2;}')"
+  dropbox_project_list="$(${DROPBOX_UPLOADER} -hq list "${chosen_server}/projects-${chosen_status}/site" | awk '{print $2;}')"
 
   # Select Project
   chosen_project="$(whiptail --title "RESTORE PROJECT BACKUP" --menu "Choose a project backup to restore:" 20 78 10 $(for x in ${dropbox_project_list}; do echo "$x [D]"; done) 3>&1 1>&2 2>&3)"
@@ -1145,7 +1145,7 @@ function restore_project() {
   if [[ ${exitstatus} -eq 0 ]]; then
 
     # Get dropbox backup list
-    dropbox_chosen_backup_path="${chosen_server}/project-${chosen_status}/site/${chosen_project}"
+    dropbox_chosen_backup_path="${chosen_server}/projects-${chosen_status}/site/${chosen_project}"
     dropbox_backup_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_chosen_backup_path}" | awk '{print $3;}')"
 
   else
@@ -1166,7 +1166,7 @@ function restore_project() {
     display --indent 8 --text "${chosen_backup_to_restore}" --tcolor YELLOW
 
     # Download backup
-    bk_to_dowload="${chosen_server}/project-${chosen_status}/site/${chosen_project}/${chosen_backup_to_restore}"
+    bk_to_dowload="${chosen_server}/projects-${chosen_status}/site/${chosen_project}/${chosen_backup_to_restore}"
     dropbox_download "${bk_to_dowload}" "${BROLIT_TMP_DIR}"
 
     # Decompress
@@ -1233,7 +1233,7 @@ function restore_project() {
 
     # Database Backup
     backup_date="$(echo "${chosen_backup_to_restore}" | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')"
-    db_to_download="${chosen_server}/${chosen_status}/database/${db_name}/${db_name}_database_${backup_date}.tar.bz2"
+    db_to_download="${chosen_server}/projects-${chosen_status}/database/${db_name}/${db_name}_database_${backup_date}.tar.bz2"
 
     # Log
     log_event "debug" "Project database selected: ${chosen_project}" "false"
