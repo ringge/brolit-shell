@@ -943,17 +943,17 @@ function restore_type_selection_from_dropbox() {
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
+    log_subsection "Restore ${chosen_type} Backup"
+
+    dropbox_status_list="online offline"
+
+    chosen_status="$(whiptail --title "RESTORE FROM BACKUP" --menu "Choose a backup status." 20 78 10 $(for x in ${dropbox_status_list}; do echo "${x} [D]"; done) 3>&1 1>&2 2>&3)"
+
     if [[ ${chosen_type} == "project" ]]; then
 
-      restore_project "${chosen_server}" "${chosen_server}"
+      restore_project "${chosen_server}" "${chosen_status}"
 
     elif [[ ${chosen_type} != "project" ]]; then
-
-      log_subsection "Restore ${chosen_type} Backup"
-
-      dropbox_status_list="online offline"
-
-      chosen_status="$(whiptail --title "RESTORE FROM BACKUP" --menu "Choose a backup status." 20 78 10 $(for x in ${dropbox_status_list}; do echo "${x} [D]"; done) 3>&1 1>&2 2>&3)"
 
       dropbox_chosen_type_path="${chosen_server}/projects-${chosen_status}/${chosen_type}"
 
