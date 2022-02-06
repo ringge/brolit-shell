@@ -44,20 +44,6 @@ function get_backup_date() {
 #   0 if ok, 1 if error
 ################################################################################
 
-################################################################################
-#
-# IMPORTANT: Maybe a new backup directory structure:
-#
-# VPS_NAME -> SERVER_CONFIGS (PHP, MySQL, Custom Status Log)
-#          -> PROYECTS -> ACTIVE
-#                      -> INACTIVE
-#                      -> ACTIVE/INACTIVE  -> DATABASE
-#                                          -> FILES
-#                                          -> CONFIGS (nginx, letsencrypt)
-#          -> DATABASES
-#          -> SITES_NO_DB
-#
-
 function make_server_files_backup() {
 
   # TODO: need to implement error_type
@@ -98,7 +84,7 @@ function make_server_files_backup() {
       # Uploading backup files
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
 
-      exitstatus$?
+      exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
         # Deleting old backup file
@@ -492,16 +478,13 @@ function make_files_backup() {
 
   local dropbox_path
 
-  # New folder with $VPSNAME
+  # Create directory structure
   storage_create_dir "${VPSNAME}"
+  storage_create_dir "${VPSNAME}/projects-online"
+  storage_create_dir "${VPSNAME}/projects-online/${bk_type}"
+  storage_create_dir "${VPSNAME}/projects-online/${bk_type}/${directory_to_backup}"
 
-  # New folder with $bk_type
-  storage_create_dir "${VPSNAME}/${bk_type}"
-
-  # New folder with $directory_to_backup (project folder)
-  storage_create_dir "${VPSNAME}/${bk_type}/${directory_to_backup}"
-
-  remote_path="${VPSNAME}/${bk_type}/${directory_to_backup}"
+  remote_path="${VPSNAME}/projects-online/${bk_type}/${directory_to_backup}"
 
   if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" || ${BACKUP_SFTP_STATUS} == "enabled" ]]; then
 
