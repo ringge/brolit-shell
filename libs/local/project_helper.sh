@@ -1106,7 +1106,6 @@ function project_delete_database() {
       # Moving deleted project backups to another directory
       storage_create_dir "/${VPSNAME}/projects-offline"
       storage_create_dir "/${VPSNAME}/projects-offline/${BK_TYPE}"
-      storage_create_dir "/${VPSNAME}/projects-offline/${BK_TYPE}/${chosen_database}"
       storage_move "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}" "/${VPSNAME}/projects-offline/${BK_TYPE}"
 
       exitstatus=$?

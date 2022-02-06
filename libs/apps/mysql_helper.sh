@@ -796,7 +796,7 @@ function mysql_database_drop() {
     if [[ ${mysql_result} -eq 0 ]]; then
 
         # Log
-        log_event "info" "- Database ${database} dropped successfully" "false"
+        log_event "info" "Database ${database} dropped successfully" "false"
         display --indent 6 --text "- Dropping database: ${database}" --result "DONE" --color GREEN
 
         return 0
