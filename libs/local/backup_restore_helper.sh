@@ -462,11 +462,12 @@ function restore_backup_server_selection() {
 
   # Select SERVER
   dropbox_server_list="$("${DROPBOX_UPLOADER}" -hq list "/" | awk '{print $2;}')"
+
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
     # Show dropbox output
-    chosen_server="$(whiptail --title "RESTORE BACKUP" --menu "Choose Server to work with" 20 78 10 $(for x in ${dropbox_server_list}; do echo "${x} [D]"; done) 3>&1 1>&2 2>&3)"
+    chosen_server="$(whiptail --title "RESTORE BACKUP" --menu "Choose a server to work with" 20 78 10 $(for x in ${dropbox_server_list}; do echo "${x} [D]"; done) 3>&1 1>&2 2>&3)"
 
     log_event "debug" "chosen_server: ${chosen_server}" "false"
 
@@ -474,8 +475,9 @@ function restore_backup_server_selection() {
     if [[ ${exitstatus} -eq 0 ]]; then
 
       # List dropbox directories
-      dropbox_type_list="$(${DROPBOX_UPLOADER} -hq list "${chosen_server}" | awk '{print $2;}')"
-      dropbox_type_list='project '${dropbox_type_list}
+      #dropbox_type_list="$(${DROPBOX_UPLOADER} -hq list "${chosen_server}" | awk '{print $2;}')"
+      #dropbox_type_list='project '${dropbox_type_list}
+      dropbox_type_list='project site database'
 
       # Select backup type
       restore_type_selection_from_dropbox "${chosen_server}" "${dropbox_type_list}"
@@ -921,10 +923,6 @@ function restore_site_files() {
 
 function restore_type_selection_from_dropbox() {
 
-  # TODO: check project type (WP? Laravel? other?)
-  # ask for directory_browser if apply
-  # add credentials on external txt and send email
-
   local chosen_server=$1
   local dropbox_type_list=$2
 
@@ -941,18 +939,23 @@ function restore_type_selection_from_dropbox() {
   local project_site               # project site
 
   chosen_type="$(whiptail --title "RESTORE FROM BACKUP" --menu "Choose a backup type. You can choose restore an entire project or only site files, database or config." 20 78 10 $(for x in ${dropbox_type_list}; do echo "${x} [D]"; done) 3>&1 1>&2 2>&3)"
+
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
-    dropbox_chosen_type_path="${chosen_server}/${chosen_type}"
-
     if [[ ${chosen_type} == "project" ]]; then
 
-      restore_project "${chosen_server}"
+      restore_project "${chosen_server}" "${chosen_server}"
 
     elif [[ ${chosen_type} != "project" ]]; then
 
       log_subsection "Restore ${chosen_type} Backup"
+
+      dropbox_status_list="online offline"
+
+      chosen_status="$(whiptail --title "RESTORE FROM BACKUP" --menu "Choose a backup status." 20 78 10 $(for x in ${dropbox_status_list}; do echo "${x} [D]"; done) 3>&1 1>&2 2>&3)"
+
+      dropbox_chosen_type_path="${chosen_server}/projects-${chosen_status}/${chosen_type}"
 
       dropbox_project_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_chosen_type_path}" | awk '{print $2;}')"
 
@@ -1111,6 +1114,7 @@ function restore_type_selection_from_dropbox() {
 #
 # Arguments:
 #   $1 = ${chosen_server}
+#   $2 = ${chosen_status} - online or offline
 #
 # Outputs:
 #   0 if ok, 1 on error.
@@ -1119,6 +1123,7 @@ function restore_type_selection_from_dropbox() {
 function restore_project() {
 
   local chosen_server=$1
+  local chosen_status=$2
 
   local dropbox_project_list
   local chosen_project
@@ -1131,15 +1136,16 @@ function restore_project() {
   log_section "Restore Project Backup"
 
   # Get dropbox folders list
-  dropbox_project_list="$(${DROPBOX_UPLOADER} -hq list "${chosen_server}/site" | awk '{print $2;}')"
+  dropbox_project_list="$(${DROPBOX_UPLOADER} -hq list "${chosen_server}/${chosen_status}/site" | awk '{print $2;}')"
 
   # Select Project
-  chosen_project="$(whiptail --title "RESTORE PROJECT BACKUP" --menu "Choose Backup Project" 20 78 10 $(for x in ${dropbox_project_list}; do echo "$x [D]"; done) 3>&1 1>&2 2>&3)"
+  chosen_project="$(whiptail --title "RESTORE PROJECT BACKUP" --menu "Choose a project backup to restore:" 20 78 10 $(for x in ${dropbox_project_list}; do echo "$x [D]"; done) 3>&1 1>&2 2>&3)"
+
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
     # Get dropbox backup list
-    dropbox_chosen_backup_path="${chosen_server}/site/${chosen_project}"
+    dropbox_chosen_backup_path="${chosen_server}/${chosen_status}/site/${chosen_project}"
     dropbox_backup_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_chosen_backup_path}" | awk '{print $3;}')"
 
   else
@@ -1160,7 +1166,7 @@ function restore_project() {
     display --indent 8 --text "${chosen_backup_to_restore}" --tcolor YELLOW
 
     # Download backup
-    bk_to_dowload="${chosen_server}/site/${chosen_project}/${chosen_backup_to_restore}"
+    bk_to_dowload="${chosen_server}/${chosen_status}/site/${chosen_project}/${chosen_backup_to_restore}"
     dropbox_download "${bk_to_dowload}" "${BROLIT_TMP_DIR}"
 
     # Decompress
@@ -1227,7 +1233,7 @@ function restore_project() {
 
     # Database Backup
     backup_date="$(echo "${chosen_backup_to_restore}" | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')"
-    db_to_download="${chosen_server}/database/${db_name}/${db_name}_database_${backup_date}.tar.bz2"
+    db_to_download="${chosen_server}/${chosen_status}/database/${db_name}/${db_name}_database_${backup_date}.tar.bz2"
 
     # Log
     log_event "debug" "Project database selected: ${chosen_project}" "false"

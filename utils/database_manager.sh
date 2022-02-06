@@ -53,6 +53,7 @@ function database_manager_menu() {
         "03)" "stage"
         "04)" "test"
         "05)" "dev"
+        "06)" "demo"
       )
 
       chosen_database_list_option="$(whiptail --title "DATABASE MANAGER" --menu " " 20 78 10 "${database_list_options[@]}" 3>&1 1>&2 2>&3)"
@@ -135,7 +136,7 @@ function database_manager_menu() {
 
       if [[ ${exitstatus} = 0 ]]; then
 
-        mysql_user_create "${chosen_username}"
+        mysql_user_create "${chosen_username}" "" "localhost"
 
       fi
 
@@ -152,7 +153,7 @@ function database_manager_menu() {
       exitstatus=$?
       if [[ ${exitstatus} = 0 ]]; then
 
-        mysql_user_delete "${chosen_user}"
+        mysql_user_delete "${chosen_user}" "localhost"
 
       fi
 
