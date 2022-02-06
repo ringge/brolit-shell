@@ -1011,10 +1011,10 @@ function project_delete_files() {
 
     # Creating new folder structure for old projects
     storage_create_dir "/${VPSNAME}/projects-offline"
-    #dropbox_output="$(${DROPBOX_UPLOADER} -q mkdir "/${VPSNAME}/offline-site" 2>&1)"
+    storage_create_dir "/${VPSNAME}/projects-offline/site"
 
     # Moving old project backups to another directory
-    storage_move "/${VPSNAME}/projects-online/${BK_TYPE}/${project_domain}" "/${VPSNAME}/projects-offline"
+    storage_move "/${VPSNAME}/projects-online/${BK_TYPE}/${project_domain}" "/${VPSNAME}/projects-offline/site"
 
     exitstatus=$?
     if [[ ${exitstatus} -eq 0 ]]; then
@@ -1096,14 +1096,18 @@ function project_delete_database() {
 
     if [[ ${backup_file} != "" ]]; then
 
+      # Extract parameters from ${backup_file}
+      database_backup_path="$(echo "${backup_file}" | cut -d ";" -f 1)"
+      #database_backup_size="$(echo "${backup_file}" | cut -d ";" -f 2)"
+
       # Upload database backup
-      storage_upload_backup "${backup_file}" "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}"
+      storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}"
 
       # Moving deleted project backups to another directory
       storage_create_dir "/${VPSNAME}/projects-offline"
       storage_create_dir "/${VPSNAME}/projects-offline/${BK_TYPE}"
       storage_create_dir "/${VPSNAME}/projects-offline/${BK_TYPE}/${chosen_database}"
-      storage_move "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}" "/${VPSNAME}/projects-offline/${BK_TYPE}/${chosen_database}"
+      storage_move "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}" "/${VPSNAME}/projects-offline/${BK_TYPE}"
 
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
