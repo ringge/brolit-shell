@@ -92,7 +92,6 @@ VPS benchmark script — based on the popular bench.sh, plus CPU and ioping test
 The script needs to be runned by root.
 
 ## Installation
-
 ### Cloud-init
 
 ```bash
@@ -144,11 +143,16 @@ You can find some configurations examples here:
 
 ## Update
 
-Run updater.sh
+🚨🚨🚨 BREAKING CHANGES SINCE VERSION 3.0 🚨🚨🚨
 
-```bash
-./updater.sh
-```
+Before you upgrade:
+
+1- Backup and rename the .brolit_conf.json
+2- Run updater.sh
+3- Run runner.sh to regenerate .brolit_conf.json
+4- Edit .brolit_conf.json
+5- If you use dropbox as backup system, please move old backups to another folder (new directory structure since version 3.2)
+6- Run runner.sh
 
 ## Running as cron job
 

@@ -56,6 +56,34 @@ function storage_create_dir() {
 }
 
 ################################################################################
+# Move files or directory
+#
+# Arguments:
+#   $1 = {to_move}
+#   $2 = {destination}
+#
+# Outputs:
+#   0 if it utils were installed, 1 on error.
+################################################################################
+
+function storage_move() {
+
+    local to_move=$1
+    local destination=$2
+
+    if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" ]]; then
+
+        dropbox_output="$(${DROPBOX_UPLOADER} move "${to_move}" "${destination}" 2>&1)"
+
+        # TODO: if destination folder already exists, it will fail
+        log_event "debug" "${DROPBOX_UPLOADER} move ${to_move} ${destination}" "false"
+        display --indent 6 --text "- Moving to offline projects on Dropbox" --result "DONE" --color GREEN
+
+    fi
+
+}
+
+################################################################################
 # Upload backup to configured storage (dropbox, sftp, etc)
 #
 # Arguments:
@@ -72,8 +100,6 @@ function storage_upload_backup() {
     local remote_directory=$2
 
     if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" ]]; then
-
-        # TODO: check function "upload_backup_to_dropbox"
 
         dropbox_upload "${file_to_upload}" "${remote_directory}"
 
@@ -141,8 +167,6 @@ function storage_delete_backup() {
     local file_to_delete=$1
 
     if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" ]]; then
-
-        # TODO: check function "upload_backup_to_dropbox"
 
         dropbox_delete "${file_to_delete}"
 

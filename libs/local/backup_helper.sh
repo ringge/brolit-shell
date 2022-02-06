@@ -87,17 +87,13 @@ function make_server_files_backup() {
     compress_result=$?
     if [[ ${compress_result} -eq 0 ]]; then
 
-      # New folder with $VPSNAME
-      storage_create_dir "${VPSNAME}"
-
-      # New folder with $bk_type
-      storage_create_dir "${VPSNAME}/${bk_type}"
-
-      # New folder with $bk_sup_type (php, nginx, mysql)
-      storage_create_dir "${VPSNAME}/${bk_type}/${bk_sup_type}"
-
       # Remote Path
-      remote_path="${VPSNAME}/${bk_type}/${bk_sup_type}"
+      remote_path="${VPSNAME}/server-config/${bk_type}/${bk_sup_type}"
+
+      # Create folder structure
+      storage_create_dir "${VPSNAME}"
+      storage_create_dir "${VPSNAME}/server-config"
+      storage_create_dir "${VPSNAME}/server-config/${bk_sup_type}"
 
       # Uploading backup files
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
@@ -217,7 +213,7 @@ function make_mailcow_backup() {
         dropbox_create_dir "${VPSNAME}"
         dropbox_create_dir "${VPSNAME}/${bk_type}"
 
-        dropbox_path="/${VPSNAME}/${bk_type}"
+        dropbox_path="/${VPSNAME}/projects-online/${bk_type}"
 
         log_event "info" "Uploading Backup to Dropbox ..." "false"
         display --indent 6 --text "- Uploading backup file to Dropbox"
@@ -663,23 +659,36 @@ function make_all_databases_backup() {
         backuped_databases_list[$database_backup_index]="${database_backup_file}"
         backuped_databases_sizes_list+=("${database_backup_size}")
 
+        # Create dir structure
+        storage_create_dir "/${VPSNAME}/projects-online"
+        storage_create_dir "/${VPSNAME}/projects-online/database"
+        storage_create_dir "/${VPSNAME}/projects-online/database/${database}"
+
         # Upload backup
-        upload_backup_to_dropbox "${database}" "database" "${database_backup_path}"
+        storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/database/${database}"
 
         exitstatus=$?
         if [[ ${exitstatus} -eq 0 ]]; then
 
+          # Old backup
+          old_backup_file="${database}_database_${DAYSAGO}.tar.bz2"
+
           # Delete old backup from Dropbox
-          #storage_delete_backup "${remote_path}/${old_bk_file}"
+          storage_delete_backup "/${VPSNAME}/projects-online/database/${database}/${old_backup_file}"
 
-          # Delete temp backup
-          rm --force "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path}"
+          exitstatus=$?
+          if [[ ${exitstatus} -eq 0 ]]; then
+            # Delete temp backup
+            rm --force "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path}"
 
-          # Log
-          log_event "info" "Temp backup deleted from server." "false"
+            # Log
+            log_event "info" "Temp backup deleted from server." "false"
 
-          # Return
-          echo "${backup_file_size}"
+            # Return
+            echo "${backup_file_size}"
+          
+
+          fi
 
         fi
 
@@ -736,8 +745,6 @@ function make_database_backup() {
   local db_file="${database}_database_${NOW}.sql"
 
   local backup_file="${database}_database_${NOW}.tar.bz2"
-
-  local dropbox_path
 
   log_event "info" "Creating new database backup of '${database}'" "false"
 
@@ -825,7 +832,7 @@ function make_project_backup() {
 
     log_event "info" "Deleting backup from server ..." "false"
 
-    rm --recursive --force "${BROLIT_TMP_DIR}/${NOW}/${backup_type}"
+    rm --recursive --force "${BROLIT_TMP_DIR}/${NOW}/${backup_type:?}"
 
     log_event "info" "Project backup done" "false"
 
@@ -833,50 +840,6 @@ function make_project_backup() {
 
     ERROR=true
     log_event "error" "Something went wrong making a project backup" "false"
-
-  fi
-
-}
-
-function upload_backup_to_dropbox() {
-
-  local project_name=$1
-  local backup_type=$2
-  local backup_file=$3
-
-  #string_remove_special_chars "${project_name}"
-
-  # New folder with $VPSNAME
-  dropbox_create_dir "${VPSNAME}"
-
-  # New folder with "project_name"
-  dropbox_create_dir "${VPSNAME}/${backup_type}"
-
-  # New folder with $project_name (project DB)
-  dropbox_create_dir "${VPSNAME}/${backup_type}/${project_name}"
-
-  # Dropbox Path
-  dropbox_path="/${VPSNAME}/${backup_type}/${project_name}"
-
-  # Upload to Dropbox
-  dropbox_upload "${backup_file}" "${dropbox_path}"
-
-  dropbox_result=$?
-  if [[ ${dropbox_result} -eq 0 ]]; then
-
-    # Old backup
-    old_backup_file="${project_name}_${backup_type}_${DAYSAGO}.tar.bz2"
-
-    # Delete
-    dropbox_delete "${dropbox_path}/${old_backup_file}"
-
-    log_event "info" "Deleting temp ${backup_type} backup ${old_backup_file} from server" "false"
-
-    rm "${backup_file}"
-
-  else
-
-    return 1
 
   fi
 

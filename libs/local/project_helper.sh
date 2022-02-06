@@ -993,8 +993,6 @@ function project_delete_files() {
 
   local project_domain=$1
 
-  local dropbox_output
-
   # Log
   log_subsection "Delete Files"
 
@@ -1012,27 +1010,37 @@ function project_delete_files() {
   if [[ ${exitstatus} -eq 0 ]]; then
 
     # Creating new folder structure for old projects
-    dropbox_output="$(${DROPBOX_UPLOADER} -q mkdir "/${VPSNAME}/offline-site" 2>&1)"
+    storage_create_dir "/${VPSNAME}/projects-offline"
+    #dropbox_output="$(${DROPBOX_UPLOADER} -q mkdir "/${VPSNAME}/offline-site" 2>&1)"
 
-    # Moving deleted project backups to another dropbox directory
-    dropbox_output="$(${DROPBOX_UPLOADER} move "/${VPSNAME}/${BK_TYPE}/${project_domain}" "/${VPSNAME}/offline-site" 2>&1)"
+    # Moving old project backups to another directory
+    storage_move "/${VPSNAME}/projects-online/${BK_TYPE}/${project_domain}" "/${VPSNAME}/projects-offline"
 
-    # TODO: if destination folder already exists, it will fail
-    log_event "debug" "${DROPBOX_UPLOADER} move ${VPSNAME}/${BK_TYPE}/${project_domain} /${VPSNAME}/offline-site" "false"
-    display --indent 6 --text "- Moving to offline projects on Dropbox" --result "DONE" --color GREEN
+    exitstatus=$?
+    if [[ ${exitstatus} -eq 0 ]]; then
+      # Delete project files on server
+      #storage_delete_backup ""
+      rm --force --recursive "${PROJECTS_PATH}/${project_domain:?}"
 
-    # Delete project files
-    rm --force --recursive "${PROJECTS_PATH}/${project_domain}"
+      # Log
+      log_event "info" "Project files deleted for ${project_domain}" "false"
+      display --indent 6 --text "- Deleting project files on server" --result "DONE" --color GREEN
 
-    # Log
-    log_event "info" "Project files deleted for ${project_domain}" "false"
-    display --indent 6 --text "- Deleting project files on server" --result "DONE" --color GREEN
+      # Make a copy of nginx configuration file
+      cp --recursive "/etc/nginx/sites-available/${project_domain}" "${BROLIT_TMP_DIR}"
 
-    # Make a copy of nginx configuration file
-    cp --recursive "/etc/nginx/sites-available/${project_domain}" "${BROLIT_TMP_DIR}"
+      # Send notification
+      send_notification "⚠️ ${VPSNAME}" "Project files for '${project_domain}' deleted."
 
-    # Send notification
-    send_notification "⚠️ ${VPSNAME}" "Project files for '${project_domain}' deleted!"
+    else
+
+      # Log
+      log_event "info" "Something went wrong trying to move old backups." "false"
+      display --indent 6 --text "- Deleting project files on server" --result "FAIL" --color RED
+
+      return 1
+
+    fi
 
   else
 
@@ -1082,22 +1090,33 @@ function project_delete_database() {
 
     fi
 
-    # Make a database Backup
-    make_database_backup "${chosen_database}"
+    # Make a database backup
+    # Make database backup
+    backup_file="$(make_database_backup "${chosen_database}")"
 
-    # Moving deleted project backups to another dropbox directory
-    ${DROPBOX_UPLOADER} move "/${VPSNAME}/${BK_TYPE}/${chosen_database}" "/${VPSNAME}/offline-site" 1>&2
+    if [[ ${backup_file} != "" ]]; then
 
-    # Log
-    clear_previous_lines "3"
-    log_event "debug" "Running: dropbox_uploader.sh move ${VPSNAME}/${BK_TYPE}/${chosen_database} /${VPSNAME}/offline-site" "false"
-    display --indent 6 --text "- Moving dropbox backup to offline directory" --result "DONE" --color GREEN
+      # Upload database backup
+      storage_upload_backup "${backup_file}" "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}"
 
-    # Delete project database
-    mysql_database_drop "${chosen_database}"
+      # Moving deleted project backups to another directory
+      storage_create_dir "/${VPSNAME}/projects-offline"
+      storage_create_dir "/${VPSNAME}/projects-offline/${BK_TYPE}"
+      storage_create_dir "/${VPSNAME}/projects-offline/${BK_TYPE}/${chosen_database}"
+      storage_move "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}" "/${VPSNAME}/projects-offline/${BK_TYPE}/${chosen_database}"
 
-    # Send notification
-    send_notification "⚠️ ${VPSNAME}" "Project database'${chosen_database}' deleted!"
+      exitstatus=$?
+      if [[ ${exitstatus} -eq 0 ]]; then
+
+        # Delete project database
+        mysql_database_drop "${chosen_database}"
+
+        # Send notification
+        send_notification "⚠️ ${VPSNAME}" "Project database'${chosen_database}' deleted!"
+
+      fi
+
+    fi
 
     # Delete mysql user
     while true; do
@@ -1407,7 +1426,7 @@ function php_project_installer() {
   change_ownership "www-data" "www-data" "${project_path}"
 
   # TODO: ask for Cloudflare support and check if root_domain is configured on the cf account
-    if [[ ${project_root_domain} == '' ]]; then
+  if [[ ${project_root_domain} == '' ]]; then
 
     possible_root_domain="$(get_root_domain "${project_domain}")"
     project_root_domain="$(cloudflare_ask_rootdomain "${possible_root_domain}")"
