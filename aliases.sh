@@ -35,7 +35,7 @@ fi
 
 # Version
 SCRIPT_VERSION="3.2-alpha4"
-ALIASES_VERSION="3.2-alpha4-088"
+ALIASES_VERSION="3.2-alpha4-090"
 
 ################################################################################
 
@@ -1121,7 +1121,7 @@ function dropbox_get_backup() {
     fi
 
     # Get dropbox backup list
-    dropbox_site_backup_path="${VPSNAME}/site/${project_domain}"
+    dropbox_site_backup_path="${VPSNAME}/projects-online/site/${project_domain}"
 
     dropbox_site_backup_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_site_backup_path}" | grep -Eo "${project_domain}_site-files_[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}.tar.bz2")"
 
