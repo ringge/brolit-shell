@@ -69,6 +69,9 @@ function wp_config_path() {
 
   if [[ ${find_output} != "" ]]; then
 
+    # Log
+    log_event "debug" "wp-config.php found: ${find_output}" "false"
+
     # Return
     echo "${find_output}"
 
@@ -257,18 +260,18 @@ function wp_replace_string_on_database() {
     exitstatus=$?
     if [[ $exitstatus -eq 0 ]]; then
 
-        # Log
-        log_event "info" "Search and replace finished ok" "false"
-        display --indent 6 --text "- Running search and replace" --result "DONE" --color GREEN
-        display --indent 8 --text "${existing_URL} was replaced by ${new_URL}"
+      # Log
+      log_event "info" "Search and replace finished ok" "false"
+      display --indent 6 --text "- Running search and replace" --result "DONE" --color GREEN
+      display --indent 8 --text "${existing_URL} was replaced by ${new_URL}"
 
     else
 
-        # Log
-        log_event "error" "Something went wrong running search and replace!" "false"
-        display --indent 6 --text "- Running search and replace" --result "FAIL" --color RED
+      # Log
+      log_event "error" "Something went wrong running search and replace!" "false"
+      display --indent 6 --text "- Running search and replace" --result "FAIL" --color RED
 
-        return 1
+      return 1
 
     fi
 

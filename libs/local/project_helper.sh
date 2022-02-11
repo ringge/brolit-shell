@@ -690,8 +690,10 @@ function project_get_configured_database() {
       ;;
 
     *)
+    
       display --indent 8 --text "Project Type Unknown" --tcolor RED
       return 1
+
       ;;
 
     esac

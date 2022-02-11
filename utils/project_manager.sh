@@ -203,13 +203,24 @@ function project_manager_menu_new_project_type_utils() {
           # Nginx config
           nginx_server_create "www.${root_domain}" "${project_type}" "root_domain" "${root_domain}"
 
-          # Let's Encrypt
-          certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${root_domain},www.${root_domain}"
+          if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "true" ]]; then
 
-          exitstatus=$?
-          if [[ ${exitstatus} -eq 0 ]]; then
+            # Cloudflare
+            cloudflare_update_record "${root_domain}" "${project_domain}" "A" "false" "${SERVER_IP}"
+            cloudflare_update_record "${root_domain}" "${project_domain}" "CNAME" "false" "www.${root_domain}"
 
-            nginx_server_add_http2_support "${project_domain}"
+          fi
+
+          if [[ ${PACKAGES_CERTBOT_STATUS} == "true" ]]; then
+            # Let's Encrypt
+            certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${root_domain},www.${root_domain}"
+
+            exitstatus=$?
+            if [[ ${exitstatus} -eq 0 ]]; then
+
+              nginx_server_add_http2_support "${project_domain}"
+
+            fi
 
           fi
 
@@ -217,6 +228,13 @@ function project_manager_menu_new_project_type_utils() {
 
           # Nginx config
           nginx_server_create "${project_domain}" "${project_type}" "single"
+
+          if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "true" ]]; then
+
+            # Cloudflare
+            cloudflare_update_record "${root_domain}" "${project_domain}" "A" "false" "${SERVER_IP}"
+
+          fi
 
           # Let's Encrypt
           certbot_certificate_install "${NOTIFICATION_EMAIL_MAILA}" "${project_domain}"
