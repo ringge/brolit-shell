@@ -191,7 +191,7 @@ function dropbox_download() {
     local local_directory=$2
 
     local tmp_file_name
-    local output
+    local dropbox_output
     local dropbox_file_to_download_result
 
     tmp_file_name="$(extract_filename_from_path "${file_to_download}")"
@@ -199,11 +199,9 @@ function dropbox_download() {
     # Log
     log_event "info" "Trying to download ${file_to_download} from Dropbox" "false"
 
-    spinner_start "- Downloading file to Dropbox"
+    spinner_start "- Downloading file from Dropbox"
 
-    #log_event "debug" "Running: ${DROPBOX_UPLOADER} -q download ${file_to_download} ${local_directory}/${tmp_file_name}"
-
-    output="$("${DROPBOX_UPLOADER}" -q download "${file_to_download}" "${local_directory}/${tmp_file_name}")"
+    dropbox_output="$("${DROPBOX_UPLOADER}" -q download "${file_to_download}" "${local_directory}/${tmp_file_name}")"
     dropbox_file_to_download_result=$?
 
     spinner_stop "${dropbox_file_to_download_result}"
@@ -227,7 +225,7 @@ function dropbox_download() {
 
         log_event "error" "Can't download file ${file_to_download} from dropbox." "false"
         log_event "error" "Last command executed: ${DROPBOX_UPLOADER} -q download ${file_to_download} ${local_directory}/${tmp_file_name}" "false"
-        log_event "debug" "Last command output: ${output}" "false"
+        log_event "debug" "Last command output: ${dropbox_output}" "false"
 
         return 1
 

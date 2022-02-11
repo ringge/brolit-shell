@@ -759,6 +759,59 @@ function _brolit_configuration_load_mysql() {
 }
 
 ################################################################################
+# Private: load postgres configuration
+#
+# Arguments:
+#   $1 = ${server_config_file}
+#
+# Outputs:
+#   nothing
+################################################################################
+
+function _brolit_configuration_load_mysql() {
+
+    local server_config_file=$1
+
+    # Globals
+    declare -g PACKAGES_POSTGRES_STATUS
+    declare -g PACKAGES_POSTGRES_CONFIG_VERSION
+    declare -g PACKAGES_POSTGRES_CONFIG_PORTS
+
+    PACKAGES_POSTGRES_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.postgres[].status")"
+
+    if [[ ${PACKAGES_POSTGRES_STATUS} == "enabled" ]]; then
+
+        PACKAGES_POSTGRES_CONFIG_VERSION="$(json_read_field "${server_config_file}" "PACKAGES.postgres[].version")"
+        # Check if all required vars are set
+        if [[ -z "${PACKAGES_POSTGRES_CONFIG_VERSION}" ]]; then
+            log_event "error" "Missing required config vars for postgres" "true"
+            exit 1
+        fi
+
+        PACKAGES_POSTGRES_CONFIG_PORTS="$(json_read_field "${server_config_file}" "PACKAGES.postgres[].config[].port")"
+        # Check if all required vars are set
+        if [[ -z "${PACKAGES_POSTGRES_CONFIG_PORTS}" ]]; then
+            log_event "error" "Missing required config vars for postgres" "true"
+            exit 1
+        fi
+
+        package_is_installed "postgresql"
+        exitstatus=$?
+        if [[ exitstatus -eq 1 ]]; then
+
+            menu_config_changes_detected "postgres" "true"
+
+        fi
+
+    fi
+
+    _brolit_configuration_app_mysql
+
+    export PACKAGES_MYSQL_STATUS PACKAGES_MYSQL_CONFIG_VERSION PACKAGES_MYSQL_CONFIG_PORTS
+
+}
+
+################################################################################
 # Private: load redis configuration
 #
 # Arguments:

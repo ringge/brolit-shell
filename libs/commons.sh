@@ -136,10 +136,24 @@ function _setup_globals_and_options() {
 
   fi
 
+  # Postgres
+  POSTGRES="$(command -v psql)"
+  if [[ -x ${POSTGRES} ]]; then
+
+    PSQLDUMP="$(command -v pg_dump)"
+
+    # Append login parameters to command
+    PSQL_ROOT="sudo -u postgres -i psql"
+    PSQLDUMP_ROOT="sudo -u postgres -i pg_dump"
+
+  fi
+
   # PHP
   PHP="$(command -v php)"
 
-  export TAR FIND MYSQLDUMP MYSQL_ROOT MYSQLDUMP_ROOT PHP CERTBOT MySQL_CF MYSQL MYSQL_CONF MAIN_VOL
+  export TAR FIND PHP CERTBOT MAIN_VOL
+  export MySQL_CF MYSQL MYSQL_CONF MYSQL_ROOT MYSQLDUMP_ROOT MYSQLDUMP
+  export POSTGRES PSQLDUMP PSQL_ROOT PSQLDUMP_ROOT
 
 }
 
@@ -1540,7 +1554,7 @@ function menu_main_options() {
       source "${BROLIT_MAIN_DIR}/utils/database_manager.sh"
 
       log_section "Database Manager"
-      database_manager_menu   
+      database_manager_menu
 
     fi
     if [[ ${chosen_type} == *"05"* ]]; then

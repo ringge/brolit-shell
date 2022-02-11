@@ -2,7 +2,7 @@
     "BROLIT_SETUP": {
         "config": [
             {
-                "version": "3.7.3",
+                "version": "3.7.4",
                 "debug": "true",
                 "quiet": "false",
                 "skip_test": "true",
@@ -264,6 +264,17 @@
                 ]
             }
         ],
+        "postgres": [
+            {
+                "status": "disabled",
+                "version": "default",
+                "config": [
+                    {
+                        "port": "default"
+                    }
+                ]
+            }
+        ],
         "redis": [
             {
                 "status": "disabled",
@@ -338,7 +349,7 @@
                 ],
                 "notifications": [
                     {
-                        "alarm_level": "",
+                        "alarm_level": "CRITICAL",
                         "maila": "",
                         "telegram": [
                             {

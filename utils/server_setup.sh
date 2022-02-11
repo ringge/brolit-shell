@@ -106,6 +106,16 @@ function server_app_setup() {
 
         ;;
 
+    "postgres")
+
+        if [[ ${PACKAGES_POSTGRES_STATUS} == "enabled" ]]; then
+            postgres_default_installer
+        else
+            package_purge "postgresql"
+        fi
+
+        ;;
+
     "redis")
 
         if [[ ${PACKAGES_REDIS_STATUS} == "enabled" ]]; then
