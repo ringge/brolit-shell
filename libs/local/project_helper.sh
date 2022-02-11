@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha4
+# Version: 3.2-alpha5
 ################################################################################
 #
 # Project Helper: Perform project actions.
@@ -690,7 +690,7 @@ function project_get_configured_database() {
       ;;
 
     *)
-    
+
       display --indent 8 --text "Project Type Unknown" --tcolor RED
       return 1
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha4
+# Version: 3.2-alpha5
 ################################################################################
 
 # Server Name
@@ -36,8 +36,8 @@ if [[ -f ${DPU_CONFIG_FILE} ]]; then
 fi
 
 # Version
-SCRIPT_VERSION="3.2-alpha4"
-ALIASES_VERSION="3.2-alpha4-092"
+SCRIPT_VERSION="3.2-alpha5"
+ALIASES_VERSION="3.2-alpha5-092"
 
 ################################################################################
 
