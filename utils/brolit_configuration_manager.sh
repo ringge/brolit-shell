@@ -768,7 +768,7 @@ function _brolit_configuration_load_mysql() {
 #   nothing
 ################################################################################
 
-function _brolit_configuration_load_mysql() {
+function _brolit_configuration_load_postgres() {
 
     local server_config_file=$1
 
@@ -1491,8 +1491,11 @@ function brolit_configuration_load() {
     ### mysql
     _brolit_configuration_load_mysql "${server_config_file}"
 
+    ### postgresql
+    _brolit_configuration_load_postgres "${server_config_file}"
+
     # If Server role 'database' is enabled, mariadb or mysql must be enabled
-    if [[ ${PACKAGES_MARIADB_STATUS} != "enabled" ]] && [[ ${PACKAGES_MYSQL_STATUS} != "enabled" ]] && [[ ${SERVER_ROLE_DATABASE} == "enabled" ]]; then
+    if [[ ${PACKAGES_MARIADB_STATUS} != "enabled" ]] && [[ ${PACKAGES_MYSQL_STATUS} != "enabled" ]] && [[ ${PACKAGES_POSTGRES_STATUS} != "enabled" ]] && [[ ${SERVER_ROLE_DATABASE} == "enabled" ]]; then
         log_event "warning" "No database engine is enabled" "true"
         exit 1
     fi

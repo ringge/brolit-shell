@@ -17,13 +17,15 @@ export EXEC_TYPE
 BROLIT_CONFIG_PATH="/etc/brolit"
 
 CLF_CONFIG_FILE=~/.cloudflare.conf
-if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" && -f ${CLF_CONFIG_FILE} ]]; then
+#if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" && -f ${CLF_CONFIG_FILE} ]]; then
+if [[ -f ${CLF_CONFIG_FILE} ]]; then
     # shellcheck source=${CLF_CONFIG_FILE}
     source "${CLF_CONFIG_FILE}"
 fi
 
 DPU_CONFIG_FILE=~/.dropbox_uploader
-if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" && -f ${DPU_CONFIG_FILE} ]]; then
+#if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" && -f ${DPU_CONFIG_FILE} ]]; then
+if [[ -f ${DPU_CONFIG_FILE} ]]; then
     # shellcheck source=${DPU_CONFIG_FILE}
     source "${DPU_CONFIG_FILE}"
     # Dropbox-uploader directory
@@ -35,7 +37,7 @@ fi
 
 # Version
 SCRIPT_VERSION="3.2-alpha4"
-ALIASES_VERSION="3.2-alpha4-090"
+ALIASES_VERSION="3.2-alpha4-092"
 
 ################################################################################
 
@@ -1122,6 +1124,8 @@ function dropbox_get_backup() {
 
     # Get dropbox backup list
     dropbox_site_backup_path="${VPSNAME}/projects-online/site/${project_domain}"
+
+    #echo "Running: ${DROPBOX_UPLOADER} -hq list \"${dropbox_site_backup_path}\" | grep -E \"${project_domain}_site-files_[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}.tar.bz2\""
 
     dropbox_site_backup_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_site_backup_path}" | grep -Eo "${project_domain}_site-files_[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}.tar.bz2")"
 
