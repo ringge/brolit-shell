@@ -1010,7 +1010,7 @@ function dropbox_get_site_backups() {
     local backup_type="site"
 
     # Get dropbox backup list
-    dropbox_chosen_backup_path="${VPSNAME}/${backup_type}/${chosen_project}"
+    dropbox_chosen_backup_path="${VPSNAME}/projects-online/${backup_type}/${chosen_project}"
     dropbox_backup_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_chosen_backup_path}")"
 
     for backup_file in ${dropbox_backup_list}; do
@@ -1043,7 +1043,7 @@ function dropbox_get_sites_backups() {
     local backup_projects=""
 
     # Get dropbox backup list
-    dropbox_chosen_backup_path="${VPSNAME}/${backup_type}"
+    dropbox_chosen_backup_path="${VPSNAME}/projects-online/${backup_type}"
     dropbox_project_backup_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_chosen_backup_path}" | awk -F " " '{ print $2 }')"
 
     for backup_dir in ${dropbox_project_backup_list}; do
