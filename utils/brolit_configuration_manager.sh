@@ -805,7 +805,7 @@ function _brolit_configuration_load_postgres() {
 
     fi
 
-    _brolit_configuration_app_mysql
+    #_brolit_configuration_app_mysql
 
     export PACKAGES_MYSQL_STATUS PACKAGES_MYSQL_CONFIG_VERSION PACKAGES_MYSQL_CONFIG_PORTS
 

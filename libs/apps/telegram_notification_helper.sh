@@ -6,11 +6,6 @@
 #
 # Telegram Notification Helper: Perform Telegram actions.
 #
-# It uses globals defined on telegram.conf
-#
-# 	${NOTIFICATION_TELEGRAM_BOT_TOKEN}
-#	${NOTIFICATION_TELEGRAM_CHAT_ID}
-#
 ################################################################################
 
 ################################################################################

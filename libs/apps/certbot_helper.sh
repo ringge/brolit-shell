@@ -42,6 +42,8 @@ function certbot_certificate_install() {
 
   else
 
+    # Log
+    clear_previous_lines "3"
     log_event "warning" "Certificate installation failed, trying force-install ..." "false"
     display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
 
@@ -61,6 +63,8 @@ function certbot_certificate_install() {
 
     else
 
+      # Log
+      clear_previous_lines "3"
       log_event "error" "Certificate installation for ${domains} failed!" "false"
       display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
       display --indent 8 --text "Please check and then run:" --tcolor RED
@@ -140,6 +144,8 @@ function certbot_certificate_expand() {
 
   else
 
+    # Log
+    clear_previous_lines "3"
     log_event "error" "Certificate installation for ${domains} failed!" "false"
     display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
 
@@ -314,6 +320,8 @@ function certbot_certonly_cloudflare() {
 
   else
 
+    # Log
+    clear_previous_lines "3"
     log_event "warning" "Certificate installation failed, trying force-install ..." "false"
     display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
 
@@ -331,6 +339,8 @@ function certbot_certonly_cloudflare() {
 
     else
 
+      # Log
+      clear_previous_lines "3"
       log_event "error" "Certificate installation for ${domains} failed!" "false"
       display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
       display --indent 8 --text "Please check and then run:" --tcolor RED
