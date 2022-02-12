@@ -1145,7 +1145,7 @@ function restore_project() {
   if [[ ${exitstatus} -eq 0 ]]; then
 
     # Get dropbox backup list
-    dropbox_chosen_backup_path="${chosen_server}/projects-${chosen_status}/projects-${chosen_status}/site/${chosen_project}"
+    dropbox_chosen_backup_path="${chosen_server}/projects-${chosen_status}/site/${chosen_project}"
     dropbox_backup_list="$("${DROPBOX_UPLOADER}" -hq list "${dropbox_chosen_backup_path}" | awk '{print $3;}')"
 
   else
@@ -1166,7 +1166,7 @@ function restore_project() {
     display --indent 8 --text "${chosen_backup_to_restore}" --tcolor YELLOW
 
     # Download backup
-    bk_to_dowload="${chosen_server}/projects-${chosen_status}/projects-${chosen_status}/site/${chosen_project}/${chosen_backup_to_restore}"
+    bk_to_dowload="${chosen_server}/projects-${chosen_status}/site/${chosen_project}/${chosen_backup_to_restore}"
     dropbox_download "${bk_to_dowload}" "${BROLIT_TMP_DIR}"
 
     # Decompress

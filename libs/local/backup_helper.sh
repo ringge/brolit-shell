@@ -489,7 +489,7 @@ function make_files_backup() {
   if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" || ${BACKUP_SFTP_STATUS} == "enabled" ]]; then
 
     # Log
-    display --indent 6 --text "- Files backup for ${directory_to_backup}"
+    display --indent 6 --text "- Files backup for ${YELLOW}${directory_to_backup}${ENDCOLOR}"
     log_event "info" "Files backup for : ${directory_to_backup}" "false"
 
     # Compress backup
@@ -500,7 +500,7 @@ function make_files_backup() {
     if [[ ${compress_result} -eq 0 ]]; then
 
       # Log
-      display --indent 6 --text "- Files backup for ${directory_to_backup}" --result "DONE" --color GREEN
+      display --indent 6 --text "- Files backup for ${YELLOW}${directory_to_backup}${ENDCOLOR}" --result "DONE" --color GREEN
 
       # Upload backup
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"

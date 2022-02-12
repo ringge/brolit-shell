@@ -109,7 +109,7 @@ function dropbox_create_dir() {
             #display --indent 6 --text "- Creating dropbox directory" --result "WARNING" --color YELLOW
             #display --indent 8 --text "Maybe directory already exists" --tcolor YELLOW
 
-            log_event "debug" "Can't create directory ${dir_to_create} from dropbox. Maybe directory already exists." "false"
+            log_event "debug" "Can't create directory ${dir_to_create} from Dropbox. Maybe directory already exists." "false"
             log_event "debug" "Last command executed: ${DROPBOX_UPLOADER} -q mkdir ${dir_to_create}" "false"
             log_event "debug" "Last command output: ${output}" "false"
 
@@ -164,7 +164,7 @@ function dropbox_upload() {
         display --indent 6 --text "- Uploading file to Dropbox" --result "ERROR" --color RED
         display --indent 8 --text "Please red log file" --tcolor RED
 
-        log_event "error" "Can't upload file ${file_to_upload} to dropbox." "false"
+        log_event "error" "Can't upload file ${file_to_upload} to Dropbox." "false"
         log_event "error" "Last command executed: ${DROPBOX_UPLOADER} upload ${file_to_upload} ${dropbox_directory}" "false"
         log_event "debug" "Last command output: ${output}" "false"
 
@@ -211,7 +211,7 @@ function dropbox_download() {
 
         clear_previous_lines "2"
 
-        display --indent 6 --text "- Downloading backup from dropbox" --result "DONE" --color GREEN
+        display --indent 6 --text "- Downloading backup from Dropbox" --result "DONE" --color GREEN
         log_event "info" "${file_to_download} downloaded" "false"
 
         return 0
@@ -220,7 +220,7 @@ function dropbox_download() {
 
         clear_previous_lines "2"
 
-        display --indent 6 --text "- Downloading backup from dropbox" --result "FAIL" --color RED
+        display --indent 6 --text "- Downloading backup from Dropbox" --result "FAIL" --color RED
         display --indent 8 --text "Please read log file" --tcolor RED
 
         log_event "error" "Can't download file ${file_to_download} from dropbox." "false"
@@ -254,14 +254,14 @@ function dropbox_delete() {
     dropbox_remove_result=$?
     if [[ ${dropbox_remove_result} -eq 0 ]]; then
 
-        display --indent 6 --text "- Deleting files from Dropbox" --result "DONE" --color GREEN
+        display --indent 6 --text "- Deleting old files from Dropbox" --result "DONE" --color GREEN
         log_event "info" "Files deleted from Dropbox"
 
         return 0
 
     else
 
-        display --indent 6 --text "- Deleting files from Dropbox" --result "WARNING" --color YELLOW
+        display --indent 6 --text "- Deleting old files from Dropbox" --result "WARNING" --color YELLOW
         display --indent 8 --text "Maybe backup file doesn't exists" --tcolor YELLOW
 
         log_event "warning" "Can't remove ${to_delete} from dropbox. Maybe backup file doesn't exists." "false"
