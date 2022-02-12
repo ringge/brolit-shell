@@ -41,7 +41,7 @@ function certbot_certificate_install() {
     return 0
 
   else
-  
+
     log_event "warning" "Certificate installation failed, trying force-install ..." "false"
     display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
 
@@ -63,6 +63,8 @@ function certbot_certificate_install() {
 
       log_event "error" "Certificate installation for ${domains} failed!" "false"
       display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
+      display --indent 8 --text "Please check and then run:" --tcolor RED
+      display --indent 8 --text "certbot --nginx -d ${domains}" --tcolor RED
 
       return 1
 
@@ -331,6 +333,8 @@ function certbot_certonly_cloudflare() {
 
       log_event "error" "Certificate installation for ${domains} failed!" "false"
       display --indent 6 --text "- Installing certificate on domains" --result "FAIL" --color RED
+      display --indent 8 --text "Please check and then run:" --tcolor RED
+      display --indent 8 --text "certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.cloudflare.conf -d ${domains}" --tcolor RED
 
     fi
 
