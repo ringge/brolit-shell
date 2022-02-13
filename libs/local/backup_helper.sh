@@ -606,23 +606,42 @@ function make_all_databases_backup() {
   # Starting Messages
   log_subsection "Backup Databases"
 
+  if [[ ${PACKAGES_MARIADB_STATUS} != "enabled" ]] && [[ ${PACKAGES_MYSQL_STATUS} != "enabled" ]] && [[ ${PACKAGES_POSTGRES_STATUS} != "enabled" ]]; then
+
+    display --indent 6 --text "- Initializing database backup script" --result "SKIPPED" --color YELLOW
+    display --indent 8 --text "No database engine present on server" --tcolor YELLOW
+    return 1
+
+  fi
+
   display --indent 6 --text "- Initializing database backup script" --result "DONE" --color GREEN
 
   # Get MySQL DBS
-  databases="$(mysql_list_databases "all")"
+  mysql_databases="$(mysql_list_databases "all")"
 
-  # Get all databases name
-  total_databases="$(mysql_count_databases "${databases}")"
+  # Count MySQL databases
+  mysql_databases_count="$(mysql_count_databases "${mysql_databases}")"
 
   # Log
-  display --indent 6 --text "- Databases found" --result "${total_databases}" --color WHITE
-  log_event "info" "Databases found: ${total_databases}" "false"
+  display --indent 6 --text "- MySql databases found" --result "${mysql_databases_count}" --color WHITE
+  log_event "info" "MySql databases found: ${mysql_databases_count}" "false"
+  log_break "true"
+
+  # Get PostgreSQL DBS
+  psql_databases="$(postgres_list_databases "all")"
+
+  # Count PostgreSQL databases
+  psql_databases_count="$(postgres_count_databases "${psql_databases}")"
+
+  # Log
+  display --indent 6 --text "- PSql databases found" --result "${psql_databases_count}" --color WHITE
+  log_event "info" "PSql databases found: ${psql_databases_count}" "false"
   log_break "true"
 
   got_error=0
   database_backup_index=0
 
-  for database in ${databases}; do
+  for database in ${mysql_databases}; do
 
     if [[ ${BLACKLISTED_DATABASES} != *"${database}"* ]]; then
 
@@ -669,7 +688,6 @@ function make_all_databases_backup() {
 
             # Return
             echo "${backup_file_size}"
-          
 
           fi
 
@@ -677,7 +695,7 @@ function make_all_databases_backup() {
 
         database_backup_index=$((database_backup_index + 1))
 
-        log_event "info" "Backup ${database_backup_index} of ${total_databases} done" "false"
+        log_event "info" "Backup ${database_backup_index} of ${mysql_databases_count} done" "false"
 
       else
 

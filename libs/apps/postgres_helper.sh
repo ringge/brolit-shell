@@ -185,9 +185,11 @@ function postgres_count_databases() {
     local db
 
     for db in ${databases}; do
-        if [[ $BLACKLISTED_DATABASES != *"${db}"* ]]; then # $BLACKLISTED_DATABASES contains blacklisted databases
+
+        if [[ ${BLACKLISTED_DATABASES} != *"${db}"* ]]; then # $BLACKLISTED_DATABASES contains blacklisted databases
             total_databases=$((total_databases + 1))
         fi
+    
     done
 
     # Return
@@ -213,7 +215,10 @@ function postgres_list_databases() {
     if [[ ${stage} == "all" ]]; then
 
         # Run command
-        databases="$(${PSQL_ROOT} -Bse 'show databases')"
+
+        # List postgress databases
+        databases="$("${PSQL_ROOT}" -c "SELECT datname FROM pg_database WHERE datistemplate = false;" -t)"
+        #databases="$(${PSQL_ROOT} -c 'SELECT u.usename AS "User Name" FROM pg_catalog.pg_user u;')"
 
     else
 
@@ -266,7 +271,8 @@ function postgres_list_users() {
     local users
 
     # Run command
-    users="$(${PSQL_ROOT} -c "SELECT u.usename AS "User Name" FROM pg_catalog.pg_user u;")"
+    # https://unix.stackexchange.com/questions/201666/command-to-list-postgresql-user-accounts
+    users="$(${PSQL_ROOT} -c 'SELECT u.usename AS "User Name" FROM pg_catalog.pg_user u;' -t)"
 
     # Check result
     postgres_result=$?
