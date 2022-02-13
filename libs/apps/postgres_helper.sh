@@ -217,7 +217,7 @@ function postgres_list_databases() {
         # Run command
 
         # List postgress databases
-        databases="$("${PSQL_ROOT}" -c "SELECT datname FROM pg_database WHERE datistemplate = false;" -t)"
+        databases="$(${PSQL_ROOT} -c "SELECT datname FROM pg_database WHERE datistemplate = false;" -t)"
         #databases="$(${PSQL_ROOT} -c 'SELECT u.usename AS "User Name" FROM pg_catalog.pg_user u;')"
 
     else

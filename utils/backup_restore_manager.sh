@@ -266,7 +266,7 @@ function subtasks_backup_handler() {
 
   databases)
 
-    make_database_backup "${DBNAME}"
+    make_database_backup "${DBNAME}" "mysql"
 
     exit
     ;;

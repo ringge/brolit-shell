@@ -629,6 +629,9 @@ function make_all_databases_backup() {
     log_event "info" "MySql databases found: ${mysql_databases_count}" "false"
     log_break "true"
 
+    # Loop in to MySQL Databases and make backup
+    mysql_databases_backup "${mysql_databases}"
+
   fi
 
   if [[ ${PACKAGES_POSTGRES_STATUS} == "enabled" ]]; then
@@ -644,7 +647,14 @@ function make_all_databases_backup() {
     log_event "info" "PSql databases found: ${psql_databases_count}" "false"
     log_break "true"
 
+    # Loop in to PostgreSQL Databases and make backup
+    psql_databases_backup "${psql_databases}"
+
   fi
+
+}
+
+function mysql_databases_backup() {
 
   got_error=0
   database_backup_index=0
@@ -656,7 +666,7 @@ function make_all_databases_backup() {
       log_event "info" "Processing [${database}] ..." "false"
 
       # Make database backup
-      backup_file="$(make_database_backup "${database}")"
+      backup_file="$(make_database_backup "${database}" "mysql")"
 
       if [[ ${backup_file} != "" ]]; then
 
@@ -734,6 +744,98 @@ function make_all_databases_backup() {
 
 }
 
+function psql_databases_backup() {
+
+  local psql_databases=$1
+
+  got_error=0
+  database_backup_index=0
+
+  for database in ${psql_databases}; do
+
+    if [[ ${BLACKLISTED_DATABASES} != *"${database}"* ]]; then
+
+      log_event "info" "Processing [${database}] ..." "false"
+
+      # Make database backup
+      backup_file="$(make_database_backup "${database}" "psql")"
+
+      if [[ ${backup_file} != "" ]]; then
+
+        # Extract parameters from ${backup_file}
+        database_backup_path="$(echo "${backup_file}" | cut -d ";" -f 1)"
+        database_backup_size="$(echo "${backup_file}" | cut -d ";" -f 2)"
+
+        database_backup_file="$(basename "${database_backup_path}")"
+
+        backuped_databases_list[$database_backup_index]="${database_backup_file}"
+        backuped_databases_sizes_list+=("${database_backup_size}")
+
+        # Create dir structure
+        storage_create_dir "/${VPSNAME}/projects-online"
+        storage_create_dir "/${VPSNAME}/projects-online/database"
+        storage_create_dir "/${VPSNAME}/projects-online/database/${database}"
+
+        # Upload backup
+        storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/database/${database}"
+
+        exitstatus=$?
+        if [[ ${exitstatus} -eq 0 ]]; then
+
+          # Old backup
+          old_backup_file="${database}_database_${DAYSAGO}.tar.bz2"
+
+          # Delete old backup from Dropbox
+          storage_delete_backup "/${VPSNAME}/projects-online/database/${database}/${old_backup_file}"
+
+          exitstatus=$?
+          if [[ ${exitstatus} -eq 0 ]]; then
+            # Delete temp backup
+            rm --force "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path}"
+
+            # Log
+            log_event "info" "Temp backup deleted from server." "false"
+
+            # Return
+            echo "${backup_file_size}"
+
+          fi
+
+        fi
+
+        database_backup_index=$((database_backup_index + 1))
+
+        log_event "info" "Backup ${database_backup_index} of ${psql_databases_count} done" "false"
+
+      else
+
+        log_event "error" "Creating backup file for database" "false"
+
+        error_msg="Something went wrong making a backup of ${database}. ${error_msg}"
+        error_type=""
+        got_error=1
+
+      fi
+
+    else
+
+      display --indent 6 --text "- Ommiting database ${database}" --result "DONE" --color WHITE
+      log_event "info" "Ommiting blacklisted database: ${database}" "false"
+
+    fi
+
+    log_break "true"
+
+  done
+
+  # Configure Email
+  mail_databases_backup_section "${error_msg}" "${error_type}" "${backuped_databases_list[@]}" "${backuped_databases_sizes_list[@]}"
+
+  # Return
+  echo "${got_error}"
+
+}
+
 ################################################################################
 # Make database Backup
 #
@@ -747,8 +849,9 @@ function make_all_databases_backup() {
 function make_database_backup() {
 
   local database=$1
+  local db_engine=$2
 
-  local mysql_export_result
+  local export_result
 
   local directory_to_backup="${BROLIT_TMP_DIR}/${NOW}/"
   local db_file="${database}_database_${NOW}.sql"
@@ -757,11 +860,21 @@ function make_database_backup() {
 
   log_event "info" "Creating new database backup of '${database}'" "false"
 
-  # Create dump file
-  mysql_database_export "${database}" "${directory_to_backup}${db_file}"
-  mysql_export_result=$?
+  if [[ ${db_engine} == "mysql" ]]; then
+    # Create dump file
+    mysql_database_export "${database}" "${directory_to_backup}${db_file}"
+  else
 
-  if [[ ${mysql_export_result} -eq 0 ]]; then
+    if [[ ${db_engine} == "psql" ]]; then
+      # Create dump file
+      postgres_database_export "${database}" "${directory_to_backup}${db_file}"
+    fi
+
+  fi
+
+  export_result=$?
+
+  if [[ ${export_result} -eq 0 ]]; then
 
     # Compress backup
     backup_file_size="$(compress "${directory_to_backup}" "${db_file}" "${BROLIT_TMP_DIR}/${NOW}/${backup_file}")"
@@ -785,7 +898,7 @@ function make_database_backup() {
   else
 
     ERROR=true
-    ERROR_TYPE="mysqldump error with ${database}"
+    ERROR_TYPE="dump error with ${database}"
 
   fi
 
@@ -837,7 +950,7 @@ function make_project_backup() {
     fi
 
     # Backup database
-    make_database_backup "${db_name}"
+    make_database_backup "${db_name}" "mysql"
 
     log_event "info" "Deleting backup from server ..." "false"
 

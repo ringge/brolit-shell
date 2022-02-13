@@ -1094,7 +1094,7 @@ function project_delete_database() {
 
     # Make a database backup
     # Make database backup
-    backup_file="$(make_database_backup "${chosen_database}")"
+    backup_file="$(make_database_backup "${chosen_database}" "mysql")"
 
     if [[ ${backup_file} != "" ]]; then
 

@@ -143,8 +143,8 @@ function _setup_globals_and_options() {
     PSQLDUMP="$(command -v pg_dump)"
 
     # Append login parameters to command
-    PSQL_ROOT="sudo -u postgres -i /usr/bin/psql"
-    PSQLDUMP_ROOT="sudo -u postgres -i /usr/bin/pg_dump"
+    PSQL_ROOT="sudo -u postgres -i psql"
+    PSQLDUMP_ROOT="sudo -u postgres -i pg_dump"
 
   fi
 
