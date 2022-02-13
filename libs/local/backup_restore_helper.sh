@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha5
+# Version: 3.2-alpha6
 ################################################################################
 #
 # Backup/Restore Helper: Backup and restore funtions.
@@ -1232,7 +1232,8 @@ function restore_project() {
     esac
 
     # Database Backup
-    backup_date="$(echo "${chosen_backup_to_restore}" | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')"
+    backup_date="$(backup_get_date "${chosen_backup_to_restore}")"
+    #backup_date="$(echo "${chosen_backup_to_restore}" | grep -Eo '[[:digit:]]{4}-[[:digit:]]{2}-[[:digit:]]{2}')"
     db_to_download="${chosen_server}/projects-${chosen_status}/database/${db_name}/${db_name}_database_${backup_date}.tar.bz2"
 
     # Log

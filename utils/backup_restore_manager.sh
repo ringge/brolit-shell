@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha5
+# Version: 3.2-alpha6
 ################################################################################
 #
 # Backup/Restore Manager: Perform backup and restore actions.
@@ -44,10 +44,10 @@ function backup_manager_menu() {
       mail_server_status_section
 
       # Databases Backup
-      make_all_databases_backup
+      backup_all_databases
 
       # Files Backup
-      make_all_files_backup
+      backup_all_files
 
       # Footer
       mail_footer "${SCRIPT_V}"
@@ -101,7 +101,7 @@ function backup_manager_menu() {
       mail_server_status_section
 
       # Databases Backup
-      make_all_databases_backup
+      backup_all_databases
 
       DB_MAIL="${BROLIT_TMP_DIR}/db-bk-${NOW}.mail"
       DB_MAIL_VAR=$(<"${DB_MAIL}")
@@ -123,7 +123,7 @@ function backup_manager_menu() {
       mail_server_status_section
 
       # Files Backup
-      make_all_files_backup
+      backup_all_files
 
       CONFIG_MAIL_VAR=$(cat "${BROLIT_TMP_DIR}/config-bk-${NOW}.mail")
 
@@ -150,7 +150,7 @@ function backup_manager_menu() {
 
         DOMAIN="$(basename "${filepath}/${filename}")"
 
-        make_project_backup "${DOMAIN}" "all"
+        backup_project "${DOMAIN}" "all"
 
         display --indent 6 --text "- Project backup" --result "DONE" --color GREEN
 
@@ -244,29 +244,29 @@ function subtasks_backup_handler() {
 
   all)
 
-    make_all_server_config_backup
-    make_sites_files_backup
+    backup_server_config_all
+    backup_projects_files
 
     exit
     ;;
 
   files)
 
-    make_sites_files_backup
+    backup_projects_files
 
     exit
     ;;
 
   server-config)
 
-    make_all_server_config_backup
+    backup_server_config_all
 
     exit
     ;;
 
   databases)
 
-    make_database_backup "${DBNAME}" "mysql"
+    backup_database "${DBNAME}" "mysql"
 
     exit
     ;;
@@ -275,7 +275,7 @@ function subtasks_backup_handler() {
 
     project_type="$(project_get_config "${PROJECTS_PATH}/${DOMAIN}" "project_type")"
 
-    make_project_backup "${DOMAIN}" "${project_type}"
+    backup_project "${DOMAIN}" "${project_type}"
 
     exit
     ;;
@@ -310,8 +310,8 @@ function subtasks_restore_handler() {
 
     log_event "debug" "TODO: restore project backup" "true"
     #make_databases_backup
-    #make_all_server_config_backup
-    #make_sites_files_backup
+    #backup_server_config_all
+    #backup_projects_files
 
     exit
     ;;
@@ -319,7 +319,7 @@ function subtasks_restore_handler() {
   files)
 
     log_event "debug" "TODO: restore files backup" "true"
-    #make_sites_files_backup
+    #backup_projects_files
 
     exit
     ;;
@@ -327,7 +327,7 @@ function subtasks_restore_handler() {
   server-config)
 
     log_event "debug" "TODO: restore config backup" "true"
-    #make_all_server_config_backup
+    #backup_server_config_all
 
     exit
     ;;
@@ -335,8 +335,8 @@ function subtasks_restore_handler() {
   databases)
 
     log_event "warning" "TODO: restore database backup" "true"
-    #log_event "debug" "Running: make_sites_files_backup"
-    #make_sites_files_backup
+    #log_event "debug" "Running: backup_projects_files"
+    #backup_projects_files
 
     exit
     ;;

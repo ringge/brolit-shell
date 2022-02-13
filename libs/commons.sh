@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha5
+# Version: 3.2-alpha6
 ################################################################################
 
 ################################################################################
@@ -54,7 +54,7 @@ function _setup_globals_and_options() {
 
   # Script
   declare -g SCRIPT_N="BROLIT SHELL"
-  declare -g SCRIPT_V="3.2-alpha5"
+  declare -g SCRIPT_V="3.2-alpha6"
 
   # Hostname
   declare -g VPSNAME="$HOSTNAME"
@@ -62,7 +62,7 @@ function _setup_globals_and_options() {
   # Default directories
   declare -g BROLIT_CONFIG_PATH="/etc/brolit"
   declare -g WSERVER="/etc/nginx"           # Webserver config files location
-  declare -g MySQL_CF="/etc/mysql"          # MySQL config files location
+  declare -g MYSQL_CF="/etc/mysql"          # MySQL config files location
   declare -g PHP_CF="/etc/php"              # PHP config files location
   declare -g LENCRYPT_CF="/etc/letsencrypt" # Let's Encrypt config files location
 
@@ -75,7 +75,7 @@ function _setup_globals_and_options() {
   declare -g BLACKLISTED_SITES=".wp-cli,.ssh,.cert,html,phpmyadmin"
 
   # Database blacklist
-  declare -g BLACKLISTED_DATABASES="information_schema,performance_schema,mysql,sys,phpmyadmin"
+  declare -g BLACKLISTED_DATABASES="information_schema,performance_schema,mysql,sys,phpmyadmin,postgres"
 
   # MAILCOW BACKUP
   declare -g MAILCOW_DIR="/opt/mailcow-dockerized/"
@@ -152,7 +152,7 @@ function _setup_globals_and_options() {
   PHP="$(command -v php)"
 
   export TAR FIND PHP CERTBOT MAIN_VOL
-  export MySQL_CF MYSQL MYSQL_CONF MYSQL_ROOT MYSQLDUMP_ROOT MYSQLDUMP
+  export MYSQL_CF MYSQL MYSQL_CONF MYSQL_ROOT MYSQLDUMP_ROOT MYSQLDUMP
   export POSTGRES PSQLDUMP PSQL_ROOT PSQLDUMP_ROOT
 
 }

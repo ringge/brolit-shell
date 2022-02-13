@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha5
+# Version: 3.2-alpha6
 ################################################################################
 
 ### Main dir check
@@ -41,10 +41,10 @@ mail_certificates_section
 log_section "Backup All"
 
 # Databases Backup
-database_backup_result="$(make_all_databases_backup)"
+database_backup_result="$(backup_all_databases)"
 
 # Files Backup
-files_backup_result="$(make_all_files_backup)"
+files_backup_result="$(backup_all_files)"
 
 # Footer
 mail_footer "${SCRIPT_V}"

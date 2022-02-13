@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha5
+# Version: 3.2-alpha6
 ################################################################################
 
 # Server Name
@@ -36,8 +36,8 @@ if [[ -f ${DPU_CONFIG_FILE} ]]; then
 fi
 
 # Version
-SCRIPT_VERSION="3.2-alpha5"
-ALIASES_VERSION="3.2-alpha5-092"
+SCRIPT_VERSION="3.2-alpha6"
+ALIASES_VERSION="3.2-alpha6-092"
 
 ################################################################################
 
@@ -378,7 +378,7 @@ function _apache_check_installed_version() {
 
 }
 
-function _get_backup_date() {
+function _backup_get_date() {
 
     local backup_file=$1
 
@@ -1131,7 +1131,7 @@ function dropbox_get_backup() {
 
     for backup_file in ${dropbox_site_backup_list}; do
 
-        backup_date="$(_get_backup_date "${backup_file}")"
+        backup_date="$(_backup_get_date "${backup_file}")"
 
         backup_to_search="${project_db}_database_${backup_date}.tar.bz2"
 

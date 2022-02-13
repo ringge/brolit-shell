@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha5
+# Version: 3.2-alpha6
 ################################################################################
 #
 # Project Helper: Perform project actions.
@@ -1006,7 +1006,7 @@ function project_delete_files() {
   BK_TYPE="site"
 
   # Making a backup of project files
-  make_files_backup "${BK_TYPE}" "${PROJECTS_PATH}" "${project_domain}"
+  backup_project_files "${BK_TYPE}" "${PROJECTS_PATH}" "${project_domain}"
 
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
@@ -1094,7 +1094,7 @@ function project_delete_database() {
 
     # Make a database backup
     # Make database backup
-    backup_file="$(make_database_backup "${chosen_database}" "mysql")"
+    backup_file="$(backup_database "${chosen_database}" "mysql")"
 
     if [[ ${backup_file} != "" ]]; then
 

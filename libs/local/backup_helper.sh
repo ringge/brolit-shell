@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha5
+# Version: 3.2-alpha6
 #############################################################################
 #
 # Backup Helper: Perform backup actions.
@@ -18,7 +18,7 @@
 #   ${backup_date}
 ################################################################################
 
-function get_backup_date() {
+function backup_get_date() {
 
   local backup_file=$1
 
@@ -44,7 +44,7 @@ function get_backup_date() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function make_server_files_backup() {
+function backup_server_files() {
 
   # TODO: need to implement error_type
 
@@ -139,7 +139,7 @@ function make_server_files_backup() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function make_mailcow_backup() {
+function backup_mailcow() {
 
   local directory_to_backup=$1
 
@@ -248,7 +248,7 @@ function make_mailcow_backup() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function make_all_server_config_backup() {
+function backup_server_config_all() {
 
   #local -n backuped_config_list
   #local -n backuped_config_sizes_list
@@ -262,7 +262,7 @@ function make_all_server_config_backup() {
     log_event "warning" "WSERVER is not defined! Skipping webserver config files backup ..." "false"
 
   else
-    nginx_files_backup_result="$(make_server_files_backup "configs" "nginx" "${WSERVER}" ".")"
+    nginx_files_backup_result="$(backup_server_files "configs" "nginx" "${WSERVER}" ".")"
 
     backuped_config_list[$backuped_config_index]="${WSERVER}"
     backuped_config_sizes_list+=("${nginx_files_backup_result}")
@@ -277,7 +277,7 @@ function make_all_server_config_backup() {
 
   else
 
-    php_files_backup_result="$(make_server_files_backup "configs" "php" "${PHP_CF}" ".")"
+    php_files_backup_result="$(backup_server_files "configs" "php" "${PHP_CF}" ".")"
 
     backuped_config_list[$backuped_config_index]="${PHP_CF}"
     backuped_config_sizes_list+=("${php_files_backup_result}")
@@ -287,14 +287,14 @@ function make_all_server_config_backup() {
   fi
 
   # TAR MySQL Config Files
-  if [[ ! -d ${MySQL_CF} ]]; then
-    log_event "warning" "MySQL_CF is not defined! Skipping MySQL config files backup ..." "false"
+  if [[ ! -d ${MYSQL_CF} ]]; then
+    log_event "warning" "MYSQL_CF is not defined! Skipping MySQL config files backup ..." "false"
 
   else
 
-    mysql_files_backup_result="$(make_server_files_backup "configs" "mysql" "${MySQL_CF}" ".")"
+    mysql_files_backup_result="$(backup_server_files "configs" "mysql" "${MYSQL_CF}" ".")"
 
-    backuped_config_list[$backuped_config_index]="${MySQL_CF}"
+    backuped_config_list[$backuped_config_index]="${MYSQL_CF}"
     backuped_config_sizes_list+=("${mysql_files_backup_result}")
 
     backuped_config_index=$((backuped_config_index + 1))
@@ -307,7 +307,7 @@ function make_all_server_config_backup() {
 
   else
 
-    le_files_backup_result="$(make_server_files_backup "configs" "letsencrypt" "${LENCRYPT_CF}" ".")"
+    le_files_backup_result="$(backup_server_files "configs" "letsencrypt" "${LENCRYPT_CF}" ".")"
 
     backuped_config_list[$backuped_config_index]="${LENCRYPT_CF}"
     backuped_config_sizes_list+=("${le_files_backup_result}")
@@ -322,7 +322,7 @@ function make_all_server_config_backup() {
 
   else
 
-    brolit_files_backup_result="$(make_server_files_backup "configs" "brolit" "${BROLIT_CONFIG_PATH}" ".")"
+    brolit_files_backup_result="$(backup_server_files "configs" "brolit" "${BROLIT_CONFIG_PATH}" ".")"
 
     backuped_config_list[$backuped_config_index]="${BROLIT_CONFIG_PATH}"
     backuped_config_sizes_list+=("${brolit_files_backup_result}")
@@ -349,7 +349,7 @@ function make_all_server_config_backup() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function make_sites_files_backup() {
+function backup_projects_files() {
 
   local backup_file_size
 
@@ -384,7 +384,7 @@ function make_sites_files_backup() {
 
       if [[ ${BLACKLISTED_SITES} != *"${directory_name}"* ]]; then
 
-        backup_file_size="$(make_files_backup "site" "${PROJECTS_PATH}" "${directory_name}")"
+        backup_file_size="$(backup_project_files "site" "${PROJECTS_PATH}" "${directory_name}")"
 
         backuped_files_list[$backuped_files_index]="${directory_name}"
         backuped_files_sizes_list+=("${backup_file_size}")
@@ -411,7 +411,7 @@ function make_sites_files_backup() {
   rm --recursive --force "${BROLIT_TMP_DIR:?}/${NOW}"
 
   # DUPLICITY
-  duplicity_backup
+  backup_duplicity
 
   # Configure Files Backup Section for Email Notification
   mail_files_backup_section "${ERROR}" "${ERROR_TYPE}" "${backuped_files_list[@]}" "${backuped_files_sizes_list[@]}"
@@ -428,7 +428,7 @@ function make_sites_files_backup() {
 #  0 if ok, 1 if error
 ################################################################################
 
-function make_all_files_backup() {
+function backup_all_files() {
 
   ## MAILCOW FILES
   if [[ ${MAILCOW_BK} == true ]]; then
@@ -441,17 +441,17 @@ function make_all_files_backup() {
 
     fi
 
-    make_mailcow_backup "${MAILCOW}"
+    backup_mailcow "${MAILCOW}"
 
   fi
 
   # TODO: error_type needs refactoring
 
   ## SERVER CONFIG FILES
-  make_all_server_config_backup
+  backup_server_config_all
 
   ## PROJECTS_PATH FILES
-  make_sites_files_backup
+  backup_projects_files
 
 }
 
@@ -467,7 +467,7 @@ function make_all_files_backup() {
 #  0 if ok, 1 if error
 ################################################################################
 
-function make_files_backup() {
+function backup_project_files() {
 
   local bk_type=$1
   local bk_path=$2
@@ -551,7 +551,7 @@ function make_files_backup() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function duplicity_backup() {
+function backup_duplicity() {
 
   if [[ ${BACKUP_DUPLICITY_STATUS} == "enabled" ]]; then
 
@@ -596,7 +596,7 @@ function duplicity_backup() {
 #  0 if ok, 1 if error
 ################################################################################
 
-function make_all_databases_backup() {
+function backup_all_databases() {
 
   local got_error
   local error_msg
@@ -622,15 +622,15 @@ function make_all_databases_backup() {
     mysql_databases="$(mysql_list_databases "all")"
 
     # Count MySQL databases
-    mysql_databases_count="$(mysql_count_databases "${mysql_databases}")"
+    databases_count="$(mysql_count_databases "${mysql_databases}")"
 
     # Log
-    display --indent 6 --text "- MySql databases found" --result "${mysql_databases_count}" --color WHITE
-    log_event "info" "MySql databases found: ${mysql_databases_count}" "false"
+    display --indent 6 --text "- MySql databases found" --result "${databases_count}" --color WHITE
+    log_event "info" "MySql databases found: ${databases_count}" "false"
     log_break "true"
 
     # Loop in to MySQL Databases and make backup
-    mysql_databases_backup "${mysql_databases}"
+    backup_databases "${mysql_databases}" "mysql"
 
   fi
 
@@ -640,33 +640,36 @@ function make_all_databases_backup() {
     psql_databases="$(postgres_list_databases "all")"
 
     # Count PostgreSQL databases
-    psql_databases_count="$(postgres_count_databases "${psql_databases}")"
+    databases_count="$(postgres_count_databases "${psql_databases}")"
 
     # Log
-    display --indent 6 --text "- PSql databases found" --result "${psql_databases_count}" --color WHITE
-    log_event "info" "PSql databases found: ${psql_databases_count}" "false"
+    display --indent 6 --text "- PSql databases found" --result "${databases_count}" --color WHITE
+    log_event "info" "PSql databases found: ${databases_count}" "false"
     log_break "true"
 
     # Loop in to PostgreSQL Databases and make backup
-    psql_databases_backup "${psql_databases}"
+    backup_databases "${psql_databases}" "psql"
 
   fi
 
 }
 
-function mysql_databases_backup() {
+function backup_databases() {
+
+  local databases=$1
+  local db_engine=$2
 
   got_error=0
   database_backup_index=0
 
-  for database in ${mysql_databases}; do
+  for database in ${databases}; do
 
     if [[ ${BLACKLISTED_DATABASES} != *"${database}"* ]]; then
 
       log_event "info" "Processing [${database}] ..." "false"
 
       # Make database backup
-      backup_file="$(make_database_backup "${database}" "mysql")"
+      backup_file="$(backup_database "${database}" "${db_engine}")"
 
       if [[ ${backup_file} != "" ]]; then
 
@@ -713,99 +716,7 @@ function mysql_databases_backup() {
 
         database_backup_index=$((database_backup_index + 1))
 
-        log_event "info" "Backup ${database_backup_index} of ${mysql_databases_count} done" "false"
-
-      else
-
-        log_event "error" "Creating backup file for database" "false"
-
-        error_msg="Something went wrong making a backup of ${database}. ${error_msg}"
-        error_type=""
-        got_error=1
-
-      fi
-
-    else
-
-      display --indent 6 --text "- Ommiting database ${database}" --result "DONE" --color WHITE
-      log_event "info" "Ommiting blacklisted database: ${database}" "false"
-
-    fi
-
-    log_break "true"
-
-  done
-
-  # Configure Email
-  mail_databases_backup_section "${error_msg}" "${error_type}" "${backuped_databases_list[@]}" "${backuped_databases_sizes_list[@]}"
-
-  # Return
-  echo "${got_error}"
-
-}
-
-function psql_databases_backup() {
-
-  local psql_databases=$1
-
-  got_error=0
-  database_backup_index=0
-
-  for database in ${psql_databases}; do
-
-    if [[ ${BLACKLISTED_DATABASES} != *"${database}"* ]]; then
-
-      log_event "info" "Processing [${database}] ..." "false"
-
-      # Make database backup
-      backup_file="$(make_database_backup "${database}" "psql")"
-
-      if [[ ${backup_file} != "" ]]; then
-
-        # Extract parameters from ${backup_file}
-        database_backup_path="$(echo "${backup_file}" | cut -d ";" -f 1)"
-        database_backup_size="$(echo "${backup_file}" | cut -d ";" -f 2)"
-
-        database_backup_file="$(basename "${database_backup_path}")"
-
-        backuped_databases_list[$database_backup_index]="${database_backup_file}"
-        backuped_databases_sizes_list+=("${database_backup_size}")
-
-        # Create dir structure
-        storage_create_dir "/${VPSNAME}/projects-online"
-        storage_create_dir "/${VPSNAME}/projects-online/database"
-        storage_create_dir "/${VPSNAME}/projects-online/database/${database}"
-
-        # Upload backup
-        storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/database/${database}"
-
-        exitstatus=$?
-        if [[ ${exitstatus} -eq 0 ]]; then
-
-          # Old backup
-          old_backup_file="${database}_database_${DAYSAGO}.tar.bz2"
-
-          # Delete old backup from Dropbox
-          storage_delete_backup "/${VPSNAME}/projects-online/database/${database}/${old_backup_file}"
-
-          exitstatus=$?
-          if [[ ${exitstatus} -eq 0 ]]; then
-            # Delete temp backup
-            rm --force "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path}"
-
-            # Log
-            log_event "info" "Temp backup deleted from server." "false"
-
-            # Return
-            echo "${backup_file_size}"
-
-          fi
-
-        fi
-
-        database_backup_index=$((database_backup_index + 1))
-
-        log_event "info" "Backup ${database_backup_index} of ${psql_databases_count} done" "false"
+        log_event "info" "Backup ${database_backup_index} of ${databases_count} done" "false"
 
       else
 
@@ -846,7 +757,7 @@ function psql_databases_backup() {
 #  "backupfile backup_file_size" if ok, 1 if error
 ################################################################################
 
-function make_database_backup() {
+function backup_database() {
 
   local database=$1
   local db_engine=$2
@@ -915,7 +826,7 @@ function make_database_backup() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function make_project_backup() {
+function backup_project() {
 
   local project_domain=$1
   local backup_type=$2
@@ -924,7 +835,7 @@ function make_project_backup() {
   local project_config_file
 
   # Backup files
-  make_files_backup "site" "${PROJECTS_PATH}" "${project_domain}"
+  backup_project_files "site" "${PROJECTS_PATH}" "${project_domain}"
 
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
@@ -950,7 +861,7 @@ function make_project_backup() {
     fi
 
     # Backup database
-    make_database_backup "${db_name}" "mysql"
+    backup_database "${db_name}" "mysql"
 
     log_event "info" "Deleting backup from server ..." "false"
 
