@@ -616,27 +616,35 @@ function make_all_databases_backup() {
 
   display --indent 6 --text "- Initializing database backup script" --result "DONE" --color GREEN
 
-  # Get MySQL DBS
-  mysql_databases="$(mysql_list_databases "all")"
+  if [[ ${PACKAGES_MARIADB_STATUS} == "enabled" ]] || [[ ${PACKAGES_MYSQL_STATUS} == "enabled" ]]; then
 
-  # Count MySQL databases
-  mysql_databases_count="$(mysql_count_databases "${mysql_databases}")"
+    # Get MySQL DBS
+    mysql_databases="$(mysql_list_databases "all")"
 
-  # Log
-  display --indent 6 --text "- MySql databases found" --result "${mysql_databases_count}" --color WHITE
-  log_event "info" "MySql databases found: ${mysql_databases_count}" "false"
-  log_break "true"
+    # Count MySQL databases
+    mysql_databases_count="$(mysql_count_databases "${mysql_databases}")"
 
-  # Get PostgreSQL DBS
-  psql_databases="$(postgres_list_databases "all")"
+    # Log
+    display --indent 6 --text "- MySql databases found" --result "${mysql_databases_count}" --color WHITE
+    log_event "info" "MySql databases found: ${mysql_databases_count}" "false"
+    log_break "true"
 
-  # Count PostgreSQL databases
-  psql_databases_count="$(postgres_count_databases "${psql_databases}")"
+  fi
 
-  # Log
-  display --indent 6 --text "- PSql databases found" --result "${psql_databases_count}" --color WHITE
-  log_event "info" "PSql databases found: ${psql_databases_count}" "false"
-  log_break "true"
+  if [[ ${PACKAGES_POSTGRES_STATUS} == "enabled" ]]; then
+
+    # Get PostgreSQL DBS
+    psql_databases="$(postgres_list_databases "all")"
+
+    # Count PostgreSQL databases
+    psql_databases_count="$(postgres_count_databases "${psql_databases}")"
+
+    # Log
+    display --indent 6 --text "- PSql databases found" --result "${psql_databases_count}" --color WHITE
+    log_event "info" "PSql databases found: ${psql_databases_count}" "false"
+    log_break "true"
+
+  fi
 
   got_error=0
   database_backup_index=0
