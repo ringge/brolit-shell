@@ -80,7 +80,7 @@ function backup_server_files() {
       # Log
       clear_previous_lines "1"
       display --indent 6 --text "- Files backup for ${YELLOW}${bk_sup_type}${ENDCOLOR}" --result "DONE" --color GREEN
-      display --indent 8 --text "Final backup size: ${YELLOW}${BOLD}${backup_file_size}${ENDCOLOR}"
+      display --indent 8 --text "Final backup size: ${YELLOW}${backup_file_size}${ENDCOLOR}"
 
       # Remote Path
       remote_path="${VPSNAME}/server-config/${bk_type}/${bk_sup_type}"
@@ -512,7 +512,7 @@ function backup_project_files() {
       # Log
       clear_previous_lines "1"
       display --indent 6 --text "- Files backup for ${YELLOW}${directory_to_backup}${ENDCOLOR}" --result "DONE" --color GREEN
-      display --indent 8 --text "Final backup size: ${YELLOW}${BOLD}${backup_file_size}${ENDCOLOR}"
+      display --indent 8 --text "Final backup size: ${YELLOW}${backup_file_size}${ENDCOLOR}"
 
       log_event "info" "Backup ${BROLIT_TMP_DIR}/${NOW}/${backup_file} created, final size: ${backup_file_size}" "false"
 
@@ -841,7 +841,7 @@ function backup_database() {
     if [[ ${compress_result} -eq 0 ]]; then
 
       # Log
-      display --indent 8 --text "Final backup size: ${YELLOW}${BOLD}${backup_file_size}${ENDCOLOR}"
+      display --indent 8 --text "Final backup size: ${YELLOW}${backup_file_size}${ENDCOLOR}"
 
       rm --force "${directory_to_backup}/${db_file}"
 

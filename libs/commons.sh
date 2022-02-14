@@ -1640,6 +1640,8 @@ function menu_config_changes_detected() {
     display --indent 6 --text "- Detecting changes on packages configuration" --result "SKIPPED" --color YELLOW
     log_event "debug" "Changes in PACKAGE section of the brolit_conf.json where detected, but CHECKPKGS is set to false." "false"
 
+    return 1
+
   fi
 
   if [[ ${bypass_prompt} == "true" ]]; then
