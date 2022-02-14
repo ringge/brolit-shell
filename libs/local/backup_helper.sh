@@ -80,6 +80,7 @@ function backup_server_files() {
       # Log
       clear_previous_lines "1"
       display --indent 6 --text "- Files backup for ${YELLOW}${bk_sup_type}${ENDCOLOR}" --result "DONE" --color GREEN
+      display --indent 8 --text "Final backup size: ${YELLOW}${BOLD}${backup_file_size}${ENDCOLOR}"
 
       # Remote Path
       remote_path="${VPSNAME}/server-config/${bk_type}/${bk_sup_type}"
@@ -108,7 +109,7 @@ function backup_server_files() {
 
     else
 
-          # Log
+      # Log
       clear_previous_lines "1"
       display --indent 6 --text "- Files backup for ${YELLOW}${bk_sup_type}${ENDCOLOR}" --result "FAIL" --color RED
 
@@ -344,7 +345,7 @@ function backup_server_config_all() {
   fi
 
   # Configure Files Backup Section for Email Notification
-  mail_config_backup_section "${ERROR}" "${ERROR_TYPE}" "${backuped_config_list[@]}" "${backuped_config_sizes_list[@]}"
+  mail_config_backup_section "${ERROR}" "${ERROR_MSG}" "${backuped_config_list[@]}" "${backuped_config_sizes_list[@]}"
 
   # Return
   echo "${ERROR}"
@@ -426,7 +427,7 @@ function backup_projects_files() {
   backup_duplicity
 
   # Configure Files Backup Section for Email Notification
-  mail_files_backup_section "${ERROR}" "${ERROR_TYPE}" "${backuped_files_list[@]}" "${backuped_files_sizes_list[@]}"
+  mail_files_backup_section "${ERROR}" "${ERROR_MSG}" "${backuped_files_list[@]}" "${backuped_files_sizes_list[@]}"
 
 }
 
@@ -447,7 +448,7 @@ function backup_all_files() {
 
     if [[ ! -d ${MAILCOW_TMP_BK} ]]; then
 
-      log_event "info" "Folder ${MAILCOW_TMP_BK} doesn't exist. Creating now ..."
+      log_event "info" "Folder ${MAILCOW_TMP_BK} doesn't exist. Creating now ..." "false"
 
       mkdir "${MAILCOW_TMP_BK}"
 
@@ -456,8 +457,6 @@ function backup_all_files() {
     backup_mailcow "${MAILCOW}"
 
   fi
-
-  # TODO: error_type needs refactoring
 
   ## SERVER CONFIG FILES
   backup_server_config_all
@@ -671,13 +670,24 @@ function backup_all_databases() {
 
 }
 
+################################################################################
+# Make databases backup
+#
+# Arguments:
+#  $1 = ${databases}
+#  $2 = ${db_engine}
+#
+# Outputs:
+#  0 if ok, 1 if error
+################################################################################
+
 function backup_databases() {
 
   local databases=$1
   local db_engine=$2
 
-  got_error=0
-  database_backup_index=0
+  local got_error=0
+  local database_backup_index=0
 
   for database in ${databases}; do
 
@@ -718,6 +728,7 @@ function backup_databases() {
 
           exitstatus=$?
           if [[ ${exitstatus} -eq 0 ]]; then
+
             # Delete temp backup
             rm --force "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path}"
 
@@ -737,11 +748,10 @@ function backup_databases() {
 
       else
 
-        log_event "error" "Creating backup file for database" "false"
-
-        error_msg="Something went wrong making a backup of ${database}. ${error_msg}"
-        error_type=""
+        #error_type=""
         got_error=1
+
+        log_event "error" "Something went wrong making a backup of ${database}." "false"
 
       fi
 
@@ -760,7 +770,7 @@ function backup_databases() {
   mail_databases_backup_section "${error_msg}" "${error_type}" "${backuped_databases_list[@]}" "${backuped_databases_sizes_list[@]}"
 
   # Return
-  echo "${got_error}"
+  return ${got_error}
 
 }
 
@@ -811,11 +821,16 @@ function backup_database() {
     compress_result=$?
     if [[ ${compress_result} -eq 0 ]]; then
 
+      # Log
+      display --indent 8 --text "Final backup size: ${YELLOW}${BOLD}${backup_file_size}${ENDCOLOR}"
+
       rm --force "${directory_to_backup}/${db_file}"
 
       # Return
-      ## backupfile backup_file_size
+      ## output format: backupfile backup_file_size
       echo "${BROLIT_TMP_DIR}/${NOW}/${backup_file};${backup_file_size}"
+
+      return 0
 
     else
 
@@ -826,7 +841,10 @@ function backup_database() {
   else
 
     ERROR=true
-    ERROR_TYPE="dump error with ${database}"
+    ERROR_MSG="Error creating dump file for database: ${database}"
+    log_event "error" "${ERROR_MSG}" "false"
+
+    return 1
 
   fi
 
