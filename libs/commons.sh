@@ -1634,8 +1634,18 @@ function menu_config_changes_detected() {
   local app_setup="${1}"
   local bypass_prompt="${2}"
 
+  if [[ ${CHECKPKGS} == "false" ]]; then
+
+    # Log
+    display --indent 6 --text "- Detecting changes on packages configuration" --result "SKIPPED" --color YELLOW
+    log_event "debug" "Changes in PACKAGE section of the brolit_conf.json where detected, but CHECKPKGS is set to false." "false"
+
+  fi
+
   if [[ ${bypass_prompt} == "true" ]]; then
 
+    # Log
+    display --indent 6 --text "- Detecting changes on packages configuration" --result "DONE" --color GREEN
     log_event "debug" "Bypassing prompt..." "false"
 
     # shellcheck source=../utils/server_setup.sh
@@ -1656,7 +1666,7 @@ function menu_config_changes_detected() {
     local first_run_string
     local chosen_first_run_options
 
-    first_run_string+="\n Some changes in the brolit_conf.json where made.\n"
+    first_run_string+="\n Changes in the brolit_conf.json where detected.\n"
     first_run_string+=" What do you want to do?:\n"
     first_run_string+="\n"
 

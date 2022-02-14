@@ -779,6 +779,8 @@ function _brolit_configuration_load_postgres() {
 
     PACKAGES_POSTGRES_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.postgres[].status")"
 
+    POSTGRES=$(which psql)
+
     if [[ ${PACKAGES_POSTGRES_STATUS} == "enabled" ]]; then
 
         PACKAGES_POSTGRES_CONFIG_VERSION="$(json_read_field "${server_config_file}" "PACKAGES.postgres[].version")"
@@ -795,19 +797,21 @@ function _brolit_configuration_load_postgres() {
             exit 1
         fi
 
-        package_is_installed "postgresql"
-        exitstatus=$?
-        if [[ exitstatus -eq 1 ]]; then
-
+        # Checking if Postgres is not installed
+        if [[ ! -x "${POSTGRES}" ]]; then
             menu_config_changes_detected "postgres" "true"
+        fi
 
+    else
+
+        # Checking if Postgres is not installed
+        if [[ -x "${POSTGRES}" ]]; then
+            menu_config_changes_detected "postgres" "true"
         fi
 
     fi
 
-    #_brolit_configuration_app_mysql
-
-    export PACKAGES_MYSQL_STATUS PACKAGES_MYSQL_CONFIG_VERSION PACKAGES_MYSQL_CONFIG_PORTS
+    export PACKAGES_POSTGRES_STATUS PACKAGES_POSTGRES_CONFIG_VERSION PACKAGES_POSTGRES_CONFIG_PORTS
 
 }
 
@@ -1376,6 +1380,15 @@ function brolit_configuration_setup_check() {
         fi
     fi
     # Check if is already defined
+    if [ -z "${CHECKPKGS}" ]; then
+        CHECKPKGS="$(json_read_field "${server_config_file}" "BROLIT_SETUP.config[].check_packages")"
+
+        if [ -z "${CHECKPKGS}" ]; then
+            echo "Missing required config vars"
+            exit 1
+        fi
+    fi
+    # Check if is already defined
     if [[ -z ${BROLIT_TMP_DIR} ]]; then
         BROLIT_TMP_DIR="$(json_read_field "${server_config_file}" "BROLIT_SETUP.config[].tmp_dir")"
 
@@ -1398,7 +1411,7 @@ function brolit_configuration_setup_check() {
         fi
     fi
 
-    export DEBUG QUIET SKIPTESTS BROLIT_TMP_DIR
+    export DEBUG QUIET SKIPTESTS CHECKPKGS BROLIT_TMP_DIR
 
 }
 ################################################################################

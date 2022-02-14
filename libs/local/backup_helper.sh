@@ -159,7 +159,6 @@ function backup_mailcow() {
   # VAR $bk_type rewrited
   local bk_type="mailcow"
   local mailcow_backup_result
-
   local dropbox_path
 
   log_subsection "Mailcow Backup"
@@ -247,7 +246,7 @@ function backup_mailcow() {
 
   fi
 
-  log_break
+  log_break "true"
 
 }
 
@@ -648,6 +647,15 @@ function backup_all_databases() {
     # Loop in to MySQL Databases and make backup
     backup_databases "${mysql_databases}" "mysql"
 
+    backup_databases_status=$?
+    if [[ ${backup_databases_status} -eq 1 ]]; then
+
+      got_error="true"
+      error_msg="${error_msg}${error_msg:+\n}MySQL backup failed"
+      error_type="${error_type}${error_type:+\n}MySQL"
+
+    fi
+
   fi
 
   if [[ ${PACKAGES_POSTGRES_STATUS} == "enabled" ]]; then
@@ -666,7 +674,18 @@ function backup_all_databases() {
     # Loop in to PostgreSQL Databases and make backup
     backup_databases "${psql_databases}" "psql"
 
+    backup_databases_status=$?
+    if [[ ${backup_databases_status} -eq 1 ]]; then
+
+      got_error="true"
+      error_msg="${error_msg}${error_msg:+\n}PostgreSQL backup failed"
+      error_type="${error_type}${error_type:+\n}PostgreSQL"
+
+    fi
+
   fi
+
+  return 0
 
 }
 
@@ -733,10 +752,10 @@ function backup_databases() {
             rm --force "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path}"
 
             # Log
-            log_event "info" "Temp backup deleted from server." "false"
+            log_event "info" "${BROLIT_TMP_DIR}/${NOW}/${database_backup_path} backup deleted from server." "false"
 
             # Return
-            echo "${backup_file_size}"
+            # echo "${database_backup_size}"
 
           fi
 
