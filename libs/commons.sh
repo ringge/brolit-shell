@@ -1415,12 +1415,6 @@ function compress() {
     # Get file size
     backup_file_size="$(du --apparent-size -s -k "${file_output}" | awk '{ print $1 }' | awk '{printf "%.3f MiB %s\n", $1/1024, $2}')"
 
-    # Log
-    #display --indent 6 --text "- Compressing ${to_backup_string}" --result "DONE" --color GREEN
-    display --indent 8 --text "Final backup size: ${YELLOW}${BOLD}${backup_file_size}${ENDCOLOR}"
-
-    log_event "info" "Backup ${file_output} created, final size: ${backup_file_size}" "false"
-
     # Return
     echo "${backup_file_size}"
 

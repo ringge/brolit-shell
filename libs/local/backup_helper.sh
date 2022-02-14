@@ -66,12 +66,20 @@ function backup_server_files() {
     backup_file="${bk_sup_type}-${bk_type}-files-${NOW}.tar.bz2"
     old_bk_file="${bk_sup_type}-${bk_type}-files-${DAYSAGO}.tar.bz2"
 
+    # Log
+    display --indent 6 --text "- Files backup for ${YELLOW}${bk_sup_type}${ENDCOLOR}"
+    log_event "info" "Files backup for : ${bk_sup_type}" "false"
+
     # Compress backup
     backup_file_size="$(compress "${bk_path}" "${directory_to_backup}" "${BROLIT_TMP_DIR}/${NOW}/${backup_file}")"
 
     # Check test result
     compress_result=$?
     if [[ ${compress_result} -eq 0 ]]; then
+
+      # Log
+      clear_previous_lines "1"
+      display --indent 6 --text "- Files backup for ${YELLOW}${bk_sup_type}${ENDCOLOR}" --result "DONE" --color GREEN
 
       # Remote Path
       remote_path="${VPSNAME}/server-config/${bk_type}/${bk_sup_type}"
@@ -99,6 +107,10 @@ function backup_server_files() {
       fi
 
     else
+
+          # Log
+      clear_previous_lines "1"
+      display --indent 6 --text "- Files backup for ${YELLOW}${bk_sup_type}${ENDCOLOR}" --result "FAIL" --color RED
 
       error_msg="Something went wrong making a backup of ${directory_to_backup}."
       error_type=""
@@ -500,7 +512,11 @@ function backup_project_files() {
     if [[ ${compress_result} -eq 0 ]]; then
 
       # Log
+      clear_previous_lines "1"
       display --indent 6 --text "- Files backup for ${YELLOW}${directory_to_backup}${ENDCOLOR}" --result "DONE" --color GREEN
+      display --indent 8 --text "Final backup size: ${YELLOW}${BOLD}${backup_file_size}${ENDCOLOR}"
+
+      log_event "info" "Backup ${BROLIT_TMP_DIR}/${NOW}/${backup_file} created, final size: ${backup_file_size}" "false"
 
       # Upload backup
       storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "${remote_path}"
@@ -525,6 +541,7 @@ function backup_project_files() {
     else
 
       # Log
+      clear_previous_lines "1"
       display --indent 6 --text "- Files backup for ${directory_to_backup}" --result "FAIL" --color RED
 
       return 1

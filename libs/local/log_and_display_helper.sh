@@ -341,13 +341,13 @@ function clear_previous_lines() {
     #loop starting $lines going down to 0
     for ((i=lines; i>0; i--)); do
 
-      #tput cuu1;tput el
+      tput cuu1 >&2;tput el >&2;
 
-      printf "\033[1A" >&2
-      echo -e "${F_DEFAULT}                                                                               ${ENDCOLOR}" >&2
-      echo -e "${F_DEFAULT}                                                                               ${ENDCOLOR}" >&2
-      printf "\033[1A" >&2
-      printf "\033[1A" >&2
+      #printf "\033[1A" >&2
+      #echo -e "${F_DEFAULT}                                                                               ${ENDCOLOR}" >&2
+      #echo -e "${F_DEFAULT}                                                                               ${ENDCOLOR}" >&2
+      #printf "\033[1A" >&2
+      #printf "\033[1A" >&2
 
     done
 

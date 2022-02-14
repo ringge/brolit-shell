@@ -432,7 +432,7 @@ function mail_config_backup_section() {
     local count
     local status_icon_f
     local content
-    local count files_inc
+    local files_inc
     local files_inc_line_p1
     local files_inc_line_p2
     local files_inc_line_p3
@@ -513,7 +513,7 @@ function mail_databases_backup_section() {
     local email_template="default"
 
     # Clear garbage output
-    clear_previous_lines "2"
+    clear_previous_lines "4"
 
     log_event "debug" "Preparing mail databases backup section ..." "false"
 

@@ -248,25 +248,43 @@ function dropbox_delete() {
     local to_delete=$1
 
     local output
+    local search_file
     local dropbox_remove_result
 
-    output="$("${DROPBOX_UPLOADER}" remove "${to_delete}")"
-    dropbox_remove_result=$?
-    if [[ ${dropbox_remove_result} -eq 0 ]]; then
+    search_file="$("${DROPBOX_UPLOADER}" -hq search "${to_delete}")"
 
-        display --indent 6 --text "- Deleting old files from Dropbox" --result "DONE" --color GREEN
-        log_event "info" "Files deleted from Dropbox"
+    # Check if not empty
+    if [[ -n "${search_file}" ]]; then
+    
+        output="$("${DROPBOX_UPLOADER}" remove "${to_delete}")"
 
-        return 0
+        dropbox_remove_result=$?
+        if [[ ${dropbox_remove_result} -eq 0 ]]; then
+
+            display --indent 6 --text "- Deleting old files from Dropbox" --result "DONE" --color GREEN
+            log_event "info" "Files deleted from Dropbox"
+
+            return 0
+
+        else
+
+            display --indent 6 --text "- Deleting old files from Dropbox" --result "WARNING" --color YELLOW
+            display --indent 8 --text "Can't remove backup from Dropbox." --tcolor YELLOW
+
+            log_event "warning" "Can't remove ${to_delete} from Dropbox." "false"
+            log_event "warning" "Last command executed: ${DROPBOX_UPLOADER} remove ${to_delete}" "false"
+            log_event "debug" "Last command output: ${output}" "false"
+
+            return 1
+
+        fi
 
     else
 
-        display --indent 6 --text "- Deleting old files from Dropbox" --result "WARNING" --color YELLOW
-        display --indent 8 --text "Maybe backup file doesn't exists" --tcolor YELLOW
+        #display --indent 6 --text "- Deleting old files from Dropbox" --result "SKIPPED" --color WHITE
+        #display --indent 8 --text "Backup file doesn't exists" --tcolor WHITE
 
-        log_event "warning" "Can't remove ${to_delete} from dropbox. Maybe backup file doesn't exists." "false"
-        log_event "warning" "Last command executed: ${DROPBOX_UPLOADER} remove ${to_delete}"
-        log_event "debug" "Last command output: ${output}"
+        log_event "warning" "Can't remove ${to_delete} from Dropbox, backup file doesn't exists." "false"
 
         return 1
 
