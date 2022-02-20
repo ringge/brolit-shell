@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha6
+# Version: 3.2-alpha7
 ################################################################################
 #
 # Server Config Manager: Brolit server configuration management.
@@ -1049,6 +1049,61 @@ function _brolit_configuration_load_netdata() {
 
     export PACKAGES_NETDATA_STATUS PACKAGES_NETDATA_CONFIG_SUBDOMAIN PACKAGES_NETDATA_CONFIG_USER PACKAGES_NETDATA_CONFIG_USER_PASS PACKAGES_NETDATA_NOTIFICATION_ALARM_LEVEL
     export PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_STATUS PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_BOT_TOKEN PACKAGES_NETDATA_NOTIFICATION_TELEGRAM_CHAT_ID
+
+}
+
+################################################################################
+# Private: load portainer configuration
+#
+# Arguments:
+#   $1 = ${server_config_file}
+#
+# Outputs:
+#   nothing
+################################################################################
+
+function _brolit_configuration_load_portainer() {
+
+    local server_config_file=$1
+
+    # Globals
+    declare -g PORTAINER
+    declare -g PACKAGES_PORTAINER_STATUS
+    declare -g PACKAGES_PORTAINER_CONFIG_SUBDOMAIN
+    declare -g PACKAGES_PORTAINER_CONFIG_PORT
+    declare -g PACKAGES_PORTAINER_CONFIG_NGINX
+
+    PORTAINER="$(docker_get_container_id "portainer")"
+
+    PACKAGES_PORTAINER_STATUS="$(json_read_field "${server_config_file}" "PACKAGES.portainer[].status")"
+
+    if [[ ${PACKAGES_PORTAINER_STATUS} == "enabled" ]]; then
+
+        PACKAGES_PORTAINER_CONFIG_SUBDOMAIN="$(json_read_field "${server_config_file}" "PACKAGES.portainer[].config[].subdomain")"
+        PACKAGES_PORTAINER_CONFIG_PORT="$(json_read_field "${server_config_file}" "PACKAGES.portainer[].config[].port")"
+        PACKAGES_PORTAINER_CONFIG_NGINX="$(json_read_field "${server_config_file}" "PACKAGES.portainer[].config[].nginx_proxy")"
+
+        # Check if all required vars are set
+        if [[ -z "${PACKAGES_PORTAINER_CONFIG_SUBDOMAIN}" ]] || [[ -z "${PACKAGES_PORTAINER_CONFIG_PORT}" ]] || [[ -z "${PACKAGES_PORTAINER_CONFIG_NGINX}" ]] || [[ -z "${PACKAGES_PORTAINER_NOTIFICATION_ALARM_LEVEL}" ]]; then
+            log_event "error" "Missing required config vars for portainer support" "true"
+            exit 1
+        fi
+
+        # Checking if Portainer is not installed
+        if [[ -z "${PORTAINER}" ]]; then
+            menu_config_changes_detected "portainer" "true"
+        fi
+
+    else
+
+        # Checking if Portainer is installed
+        if [[ -n "${PORTAINER}" ]]; then
+            menu_config_changes_detected "portainer" "true"
+        fi
+
+    fi
+
+    export PACKAGES_PORTAINER_STATUS PACKAGES_PORTAINER_CONFIG_SUBDOMAIN PACKAGES_PORTAINER_CONFIG_USER PACKAGES_PORTAINER_CONFIG_USER_PASS PACKAGES_PORTAINER_NOTIFICATION_ALARM_LEVEL
 
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha6
+# Version: 3.2-alpha7
 ################################################################################
 #
 # Docker Helper: Perform docker actions.
@@ -121,6 +121,38 @@ function docker_list_images() {
         # Docker list images
         docker_images="$(docker images --format '{{.Repository}}:{{.Tag}}')"
         echo "${docker_images}"
+
+        return 0
+
+    else
+
+        return 1
+
+    fi
+
+}
+
+################################################################################
+# Get container id
+#
+# Arguments:
+#   $1 = ${image_name}
+#
+# Outputs:
+#   0 if ok, 1 on error.
+################################################################################
+
+function docker_get_container_id() {
+
+    local image_name="${1}"
+
+    #package_is_installed "docker"
+
+    container_id="$(docker ps | grep "${image_name}" | awk '{print $1;}')"
+
+    if [[ -z ${container_id} ]]; then
+
+        echo "${container_id}"
 
         return 0
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha6
+# Version: 3.2-alpha7
 #############################################################################
 
 function postgres_default_installer() {
@@ -34,18 +34,18 @@ function postgres_default_installer() {
 function postgres_purge_installation() {
 
   # Log
-  log_event "warning" "Purging mysql-* packages ..." "false"
   display --indent 6 --text "- Purging MySQL packages"
+  log_event "info" "Purging postgresql-* packages ..." "false"
 
   # Apt
-  apt-get --yes purge postgresql postgresql-contrib -qq >/dev/null
+  apt-get --yes purge postgresql postgresql-common postgresql-contrib -qq >/dev/null
   apt-get autoremove -qq >/dev/null
   apt-get autoclean -qq >/dev/null
 
   # Log
   clear_previous_lines "1"
-  log_event "info" "postgresql postgresql-contrib packages purged!" "false"
   display --indent 6 --text "- Purging Postgres packages" --result "DONE" --color GREEN
+  log_event "info" "postgresql packages purged" "false"
 
 }
 
@@ -63,4 +63,3 @@ function postgres_check_installed_version() {
   psql --version | awk '{ print $5 }' | awk -F\, '{ print $1 }'
 
 }
-

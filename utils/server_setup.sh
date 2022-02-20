@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha6
+# Version: 3.2-alpha7
 ################################################################################
 #
 # Server Setup: Perform server setup actions.
@@ -190,6 +190,17 @@ function server_app_setup() {
             cockpit_installer
         else
             package_purge "cockpit"
+        fi
+
+        ;;
+
+    "portainer")
+
+        if [[ ${PACKAGES_PORTAINER_STATUS} == "enabled" ]]; then
+            portainer_installer
+            portainer_configure
+        else
+            portainer_purge
         fi
 
         ;;

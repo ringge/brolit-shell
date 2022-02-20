@@ -2,7 +2,7 @@
     "BROLIT_SETUP": {
         "config": [
             {
-                "version": "3.7.4",
+                "version": "3.7.5",
                 "debug": "true",
                 "quiet": "false",
                 "skip_test": "true",
@@ -304,7 +304,14 @@
         "portainer": [
             {
                 "status": "disabled",
-                "version": "default"
+                "version": "default",
+                "config": [
+                    {
+                        "port": "9000",
+                        "nginx_proxy": "",
+                        "subdomain": ""
+                    }
+                ]
             }
         ],
         "certbot": [
