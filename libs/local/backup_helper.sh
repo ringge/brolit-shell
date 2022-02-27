@@ -44,7 +44,7 @@ function backup_get_date() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function backup_server_files() {
+function backup_server_config() {
 
   # TODO: need to implement error_type
 
@@ -139,6 +139,107 @@ function backup_server_files() {
   fi
 
   log_break "true"
+
+}
+
+################################################################################
+# Make all server configs Backup
+#
+# Arguments:
+#  none
+#
+# Outputs:
+#   0 if ok, 1 if error
+################################################################################
+
+function backup_all_server_configs() {
+
+  #local -n backuped_config_list
+  #local -n backuped_config_sizes_list
+
+  local backuped_config_index=0
+
+  log_subsection "Backup Server Config"
+
+  # TAR Webserver Config Files
+  if [[ ! -d ${WSERVER} ]]; then
+    log_event "warning" "WSERVER is not defined! Skipping webserver config files backup ..." "false"
+
+  else
+    nginx_files_backup_result="$(backup_server_config "configs" "nginx" "${WSERVER}" ".")"
+
+    backuped_config_list[$backuped_config_index]="${WSERVER}"
+    backuped_config_sizes_list+=("${nginx_files_backup_result}")
+
+    backuped_config_index=$((backuped_config_index + 1))
+
+  fi
+
+  # TAR PHP Config Files
+  if [[ ! -d ${PHP_CF} ]]; then
+    log_event "warning" "PHP_CF is not defined! Skipping PHP config files backup ..." "false"
+
+  else
+
+    php_files_backup_result="$(backup_server_config "configs" "php" "${PHP_CF}" ".")"
+
+    backuped_config_list[$backuped_config_index]="${PHP_CF}"
+    backuped_config_sizes_list+=("${php_files_backup_result}")
+
+    backuped_config_index=$((backuped_config_index + 1))
+
+  fi
+
+  # TAR MySQL Config Files
+  if [[ ! -d ${MYSQL_CF} ]]; then
+    log_event "warning" "MYSQL_CF is not defined! Skipping MySQL config files backup ..." "false"
+
+  else
+
+    mysql_files_backup_result="$(backup_server_config "configs" "mysql" "${MYSQL_CF}" ".")"
+
+    backuped_config_list[$backuped_config_index]="${MYSQL_CF}"
+    backuped_config_sizes_list+=("${mysql_files_backup_result}")
+
+    backuped_config_index=$((backuped_config_index + 1))
+
+  fi
+
+  # TAR Let's Encrypt Config Files
+  if [[ ! -d ${LENCRYPT_CF} ]]; then
+    log_event "warning" "LENCRYPT_CF is not defined! Skipping Letsencrypt config files backup ..." "false"
+
+  else
+
+    le_files_backup_result="$(backup_server_config "configs" "letsencrypt" "${LENCRYPT_CF}" ".")"
+
+    backuped_config_list[$backuped_config_index]="${LENCRYPT_CF}"
+    backuped_config_sizes_list+=("${le_files_backup_result}")
+
+    backuped_config_index=$((backuped_config_index + 1))
+
+  fi
+
+  # TAR Devops Config Files
+  if [[ ! -d ${BROLIT_CONFIG_PATH} ]]; then
+    log_event "warning" "BROLIT_CONFIG_PATH is not defined! Skipping DevOps config files backup ..." "false"
+
+  else
+
+    brolit_files_backup_result="$(backup_server_config "configs" "brolit" "${BROLIT_CONFIG_PATH}" ".")"
+
+    backuped_config_list[$backuped_config_index]="${BROLIT_CONFIG_PATH}"
+    backuped_config_sizes_list+=("${brolit_files_backup_result}")
+
+    backuped_config_index=$((backuped_config_index + 1))
+
+  fi
+
+  # Configure Files Backup Section for Email Notification
+  mail_config_backup_section "${ERROR}" "${ERROR_MSG}" "${backuped_config_list[@]}" "${backuped_config_sizes_list[@]}"
+
+  # Return
+  echo "${ERROR}"
 
 }
 
@@ -251,107 +352,6 @@ function backup_mailcow() {
 }
 
 ################################################################################
-# Make all server configs Backup
-#
-# Arguments:
-#  none
-#
-# Outputs:
-#   0 if ok, 1 if error
-################################################################################
-
-function backup_server_config_all() {
-
-  #local -n backuped_config_list
-  #local -n backuped_config_sizes_list
-
-  local backuped_config_index=0
-
-  log_subsection "Backup Server Config"
-
-  # TAR Webserver Config Files
-  if [[ ! -d ${WSERVER} ]]; then
-    log_event "warning" "WSERVER is not defined! Skipping webserver config files backup ..." "false"
-
-  else
-    nginx_files_backup_result="$(backup_server_files "configs" "nginx" "${WSERVER}" ".")"
-
-    backuped_config_list[$backuped_config_index]="${WSERVER}"
-    backuped_config_sizes_list+=("${nginx_files_backup_result}")
-
-    backuped_config_index=$((backuped_config_index + 1))
-
-  fi
-
-  # TAR PHP Config Files
-  if [[ ! -d ${PHP_CF} ]]; then
-    log_event "warning" "PHP_CF is not defined! Skipping PHP config files backup ..." "false"
-
-  else
-
-    php_files_backup_result="$(backup_server_files "configs" "php" "${PHP_CF}" ".")"
-
-    backuped_config_list[$backuped_config_index]="${PHP_CF}"
-    backuped_config_sizes_list+=("${php_files_backup_result}")
-
-    backuped_config_index=$((backuped_config_index + 1))
-
-  fi
-
-  # TAR MySQL Config Files
-  if [[ ! -d ${MYSQL_CF} ]]; then
-    log_event "warning" "MYSQL_CF is not defined! Skipping MySQL config files backup ..." "false"
-
-  else
-
-    mysql_files_backup_result="$(backup_server_files "configs" "mysql" "${MYSQL_CF}" ".")"
-
-    backuped_config_list[$backuped_config_index]="${MYSQL_CF}"
-    backuped_config_sizes_list+=("${mysql_files_backup_result}")
-
-    backuped_config_index=$((backuped_config_index + 1))
-
-  fi
-
-  # TAR Let's Encrypt Config Files
-  if [[ ! -d ${LENCRYPT_CF} ]]; then
-    log_event "warning" "LENCRYPT_CF is not defined! Skipping Letsencrypt config files backup ..." "false"
-
-  else
-
-    le_files_backup_result="$(backup_server_files "configs" "letsencrypt" "${LENCRYPT_CF}" ".")"
-
-    backuped_config_list[$backuped_config_index]="${LENCRYPT_CF}"
-    backuped_config_sizes_list+=("${le_files_backup_result}")
-
-    backuped_config_index=$((backuped_config_index + 1))
-
-  fi
-
-  # TAR Devops Config Files
-  if [[ ! -d ${BROLIT_CONFIG_PATH} ]]; then
-    log_event "warning" "BROLIT_CONFIG_PATH is not defined! Skipping DevOps config files backup ..." "false"
-
-  else
-
-    brolit_files_backup_result="$(backup_server_files "configs" "brolit" "${BROLIT_CONFIG_PATH}" ".")"
-
-    backuped_config_list[$backuped_config_index]="${BROLIT_CONFIG_PATH}"
-    backuped_config_sizes_list+=("${brolit_files_backup_result}")
-
-    backuped_config_index=$((backuped_config_index + 1))
-
-  fi
-
-  # Configure Files Backup Section for Email Notification
-  mail_config_backup_section "${ERROR}" "${ERROR_MSG}" "${backuped_config_list[@]}" "${backuped_config_sizes_list[@]}"
-
-  # Return
-  echo "${ERROR}"
-
-}
-
-################################################################################
 # Make sites files Backup
 #
 # Arguments:
@@ -361,7 +361,7 @@ function backup_server_config_all() {
 #   0 if ok, 1 if error
 ################################################################################
 
-function backup_projects_files() {
+function backup_all_projects_files() {
 
   local backup_file_size
 
@@ -458,10 +458,10 @@ function backup_all_files() {
   fi
 
   ## SERVER CONFIG FILES
-  backup_server_config_all
+  backup_all_server_configs
 
   ## PROJECTS_PATH FILES
-  backup_projects_files
+  backup_all_projects_files
 
 }
 
@@ -715,7 +715,7 @@ function backup_databases() {
       log_event "info" "Processing [${database}] ..." "false"
 
       # Make database backup
-      backup_file="$(backup_database "${database}" "${db_engine}")"
+      backup_file="$(backup_project_database "${database}" "${db_engine}")"
 
       if [[ ${backup_file} != "" ]]; then
 
@@ -727,14 +727,6 @@ function backup_databases() {
 
         backuped_databases_list[$database_backup_index]="${database_backup_file}"
         backuped_databases_sizes_list+=("${database_backup_size}")
-
-        # Create dir structure
-        storage_create_dir "/${VPSNAME}/projects-online"
-        storage_create_dir "/${VPSNAME}/projects-online/database"
-        storage_create_dir "/${VPSNAME}/projects-online/database/${database}"
-
-        # Upload backup
-        storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/database/${database}"
 
         exitstatus=$?
         if [[ ${exitstatus} -eq 0 ]]; then
@@ -803,7 +795,7 @@ function backup_databases() {
 #  "backupfile backup_file_size" if ok, 1 if error
 ################################################################################
 
-function backup_database() {
+function backup_project_database() {
 
   local database=$1
   local db_engine=$2
@@ -830,7 +822,6 @@ function backup_database() {
   fi
 
   export_result=$?
-
   if [[ ${export_result} -eq 0 ]]; then
 
     # Compress backup
@@ -843,13 +834,29 @@ function backup_database() {
       # Log
       display --indent 8 --text "Final backup size: ${YELLOW}${backup_file_size}${ENDCOLOR}"
 
-      rm --force "${directory_to_backup}/${db_file}"
+      # Extract parameters from ${backup_file}
+      database_backup_path="$(echo "${backup_file}" | cut -d ";" -f 1)"
 
-      # Return
-      ## output format: backupfile backup_file_size
-      echo "${BROLIT_TMP_DIR}/${NOW}/${backup_file};${backup_file_size}"
+      # Create dir structure
+      storage_create_dir "/${VPSNAME}/projects-online"
+      storage_create_dir "/${VPSNAME}/projects-online/database"
+      storage_create_dir "/${VPSNAME}/projects-online/database/${database}"
 
-      return 0
+      # Upload database backup
+      storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/database/${database}"
+
+      upload_result=$?
+      if [[ ${upload_result} -eq 0 ]]; then
+
+        rm --force "${directory_to_backup}/${db_file}"
+
+        # Return
+        ## output format: backupfile backup_file_size
+        echo "${BROLIT_TMP_DIR}/${NOW}/${backup_file};${backup_file_size}"
+
+        return 0
+
+      fi
 
     else
 
@@ -904,18 +911,22 @@ function backup_project() {
 
     if [[ -f "${project_config_file}" ]]; then
 
-      db_name="$(project_get_config "${PROJECTS_PATH}/${project_domain}" "project_db")"
+      project_type="$(project_get_config "${project_config_file}" "project[].type")"
+      db_name="$(project_get_configured_database "${BROLIT_TMP_DIR}/${project_name}" "${project_type}")"
+      db_engine="$(project_get_configured_database_engine "${BROLIT_TMP_DIR}/${project_name}" "${project_type}")"
 
     else
 
+      #db_engine="$(project_get_configured_database_engine "${BROLIT_TMP_DIR}/${project_name}" "${project_type}")"
       db_stage="$(project_get_stage_from_domain "${project_domain}")"
       db_name="$(project_get_name_from_domain "${project_domain}")"
       db_name="${db_name}_${db_stage}"
 
     fi
 
+    # TODO: check database engine
     # Backup database
-    backup_database "${db_name}" "mysql"
+    backup_project_database "${db_name}" "mysql"
 
     log_event "info" "Deleting backup from server ..." "false"
 

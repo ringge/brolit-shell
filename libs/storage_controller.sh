@@ -71,13 +71,15 @@ function storage_move() {
     local to_move=$1
     local destination=$2
 
+    local dropbox_output
+
     if [[ ${BACKUP_DROPBOX_STATUS} == "enabled" ]]; then
 
         dropbox_output="$(${DROPBOX_UPLOADER} move "${to_move}" "${destination}" 2>&1)"
 
         # TODO: if destination folder already exists, it will fail
         log_event "debug" "${DROPBOX_UPLOADER} move ${to_move} ${destination}" "false"
-        display --indent 6 --text "- Moving to offline projects on Dropbox" --result "DONE" --color GREEN
+        display --indent 6 --text "- Moving files to offline-projects on Dropbox" --result "DONE" --color GREEN
 
     fi
 

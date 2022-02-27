@@ -1171,16 +1171,16 @@ function restore_project() {
 
     install_path="${PROJECTS_PATH}/${new_project_domain}"
 
-    # Database Backup
-    project_backup_date="$(backup_get_date "${chosen_backup_to_restore}")"
-    db_to_download="${chosen_server}/projects-${chosen_status}/database/${db_name}/${db_name}_database_${project_backup_date}.tar.bz2"
-    db_to_restore="${BROLIT_TMP_DIR}/${db_name}_database_${project_backup_date}.tar.bz2"
+    if [[ -n ${db_name} ]]; then
 
-    # Log
-    log_event "debug" "Project database selected: ${chosen_project}" "false"
-    log_event "debug" "Backup date: ${project_backup_date}" "false"
+      # Database Backup
+      project_backup_date="$(backup_get_date "${chosen_backup_to_restore}")"
+      db_to_download="${chosen_server}/projects-${chosen_status}/database/${db_name}/${db_name}_database_${project_backup_date}.tar.bz2"
+      db_to_restore="${BROLIT_TMP_DIR}/${db_name}_database_${project_backup_date}.tar.bz2"
 
-    if [[ ${db_name} != "" ]]; then
+      # Log
+      log_event "debug" "Project database selected: ${chosen_project}" "false"
+      log_event "debug" "Backup date: ${project_backup_date}" "false"
 
       # Downloading Database Backup
       dropbox_download "${db_to_download}" "${BROLIT_TMP_DIR}"
@@ -1237,7 +1237,6 @@ function restore_project() {
 
       # TODO: ask to download manually calling restore_database_backup or skip database restore part
       project_db_status="disabled"
-      return 1
 
     fi
 
@@ -1273,7 +1272,7 @@ function restore_project() {
 
     else
 
-      # TODO: remove hardcoded parameters "wordpress" and "single"
+      # TODO: remove hardcoded parameter "single"
 
       # Nginx config
       nginx_server_create "${new_project_domain}" "${project_type}" "single"

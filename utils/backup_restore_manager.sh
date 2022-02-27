@@ -244,29 +244,29 @@ function subtasks_backup_handler() {
 
   all)
 
-    backup_server_config_all
-    backup_projects_files
+    backup_all_server_configs
+    backup_all_projects_files
 
     exit
     ;;
 
   files)
 
-    backup_projects_files
+    backup_all_projects_files
 
     exit
     ;;
 
   server-config)
 
-    backup_server_config_all
+    backup_all_server_configs
 
     exit
     ;;
 
   databases)
 
-    backup_database "${DBNAME}" "mysql"
+    backup_project_database "${DBNAME}" "mysql"
 
     exit
     ;;
@@ -310,8 +310,8 @@ function subtasks_restore_handler() {
 
     log_event "debug" "TODO: restore project backup" "true"
     #make_databases_backup
-    #backup_server_config_all
-    #backup_projects_files
+    #backup_all_server_configs
+    #backup_all_projects_files
 
     exit
     ;;
@@ -319,7 +319,7 @@ function subtasks_restore_handler() {
   files)
 
     log_event "debug" "TODO: restore files backup" "true"
-    #backup_projects_files
+    #backup_all_projects_files
 
     exit
     ;;
@@ -327,7 +327,7 @@ function subtasks_restore_handler() {
   server-config)
 
     log_event "debug" "TODO: restore config backup" "true"
-    #backup_server_config_all
+    #backup_all_server_configs
 
     exit
     ;;
@@ -335,8 +335,8 @@ function subtasks_restore_handler() {
   databases)
 
     log_event "warning" "TODO: restore database backup" "true"
-    #log_event "debug" "Running: backup_projects_files"
-    #backup_projects_files
+    #log_event "debug" "Running: backup_all_projects_files"
+    #backup_all_projects_files
 
     exit
     ;;

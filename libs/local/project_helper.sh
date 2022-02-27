@@ -1164,18 +1164,11 @@ function project_delete_database() {
 
     fi
 
-    # Make a database backup
+    # TODO: check database engine
     # Make database backup
-    backup_file="$(backup_database "${chosen_database}" "mysql")"
+    backup_file="$(backup_project_database "${chosen_database}" "mysql")"
 
     if [[ ${backup_file} != "" ]]; then
-
-      # Extract parameters from ${backup_file}
-      database_backup_path="$(echo "${backup_file}" | cut -d ";" -f 1)"
-      #database_backup_size="$(echo "${backup_file}" | cut -d ";" -f 2)"
-
-      # Upload database backup
-      storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/${BK_TYPE}/${chosen_database}"
 
       # Moving deleted project backups to another directory
       storage_create_dir "/${VPSNAME}/projects-offline"
@@ -1185,6 +1178,7 @@ function project_delete_database() {
       exitstatus=$?
       if [[ ${exitstatus} -eq 0 ]]; then
 
+        # TODO: check database engine
         # Delete project database
         mysql_database_drop "${chosen_database}"
 
@@ -1195,6 +1189,7 @@ function project_delete_database() {
 
     fi
 
+    # TODO: check database engine
     # Delete mysql user
     while true; do
 
