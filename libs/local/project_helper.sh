@@ -1394,14 +1394,14 @@ function project_get_type() {
   local dir_path=$1
 
   local project_type
-  local is_wp
 
   if [[ ${dir_path} != "" ]]; then
 
     # WP?
-    is_wp="$(wp_config_path "${dir_path}")"
+    wp_config_path "${dir_path}"
 
-    if [[ -z ${is_wp} ]]; then
+    exitstatus=$?
+    if [[ ${exitstatus} -eq 0 ]]; then
 
       project_type="wordpress"
 
