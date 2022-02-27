@@ -1156,16 +1156,18 @@ function restore_project() {
     # Asking project name
     project_name="$(ask_project_name "${possible_project_name}")"
 
-    # Sanitize ${project_name}
-    db_project_name="$(mysql_name_sanitize "${project_name}")"
-
     display --indent 8 --text "Project Type ${project_type}" --tcolor GREEN
 
     # Reading config file
-    db_engine="$(project_get_configured_database_engine "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
-    db_name="$(project_get_configured_database "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
-    db_user="$(project_get_configured_database_user "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
-    db_pass="$(project_get_configured_database_userpassw "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
+    if [[ ${project_type} != "html" ]]; then
+      # Database vars
+      db_engine="$(project_get_configured_database_engine "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
+      db_name="$(project_get_configured_database "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
+      db_user="$(project_get_configured_database_user "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
+      db_pass="$(project_get_configured_database_userpassw "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
+      # Sanitize ${project_name}
+      db_project_name="$(mysql_name_sanitize "${project_name}")"
+    fi
 
     install_path="${PROJECTS_PATH}/${new_project_domain}"
 

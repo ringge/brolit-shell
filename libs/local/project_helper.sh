@@ -674,7 +674,8 @@ function project_get_configured_database_engine() {
 
     *)
 
-      display --indent 8 --text "Project Type Unknown" --tcolor RED
+      log_event "debug" "No database information for project." "false"
+
       return 1
 
       ;;
@@ -762,7 +763,7 @@ function project_get_configured_database() {
 
     *)
 
-      display --indent 8 --text "Project Type Unknown" --tcolor RED
+      log_event "debug" "No database information for project." "false"
       return 1
 
       ;;
@@ -841,7 +842,7 @@ function project_get_configured_database_user() {
       ;;
 
     *)
-      display --indent 8 --text "Project Type Unknown" --tcolor RED
+      log_event "debug" "No database information for project." "false"
       return 1
       ;;
 
@@ -920,7 +921,7 @@ function project_get_configured_database_userpassw() {
       ;;
 
     *)
-      display --indent 8 --text "Project Type Unknown" --tcolor RED
+      log_event "debug" "No database information for project." "false"
       return 1
       ;;
 
