@@ -1398,32 +1398,99 @@ function project_get_type() {
 
   if [[ ${dir_path} != "" ]]; then
 
+    # WP?
     is_wp="$(wp_config_path "${dir_path}")"
 
-    if [[ ${is_wp} != "" ]]; then
+    if [[ -z ${is_wp} ]]; then
 
       project_type="wordpress"
 
-    else
+      # Return
+      echo "${project_type}"
 
-      laravel_v="$(php "${project_dir}/artisan" --version)"
-
-      if [[ ${laravel_v} != "" ]]; then
-
-        project_type="laravel"
-
-      else
-        # TODO: implements nodejs,pure php, and others
-        project_type="project_type_unknown"
-
-      fi
+      return 0
 
     fi
 
-  fi
+    # Laravel?
+    laravel_v="$(php "${project_dir}/artisan" --version | grep -oE "Laravel Framework [0-9]+\.[0-9]+\.[0-9]+")"
 
-  # Return
-  echo "${project_type}"
+    if [[ -z ${laravel_v} ]]; then
+
+      project_type="laravel"
+
+      # Return
+      echo "${project_type}"
+
+      return 0
+
+    fi
+
+    # other-php?
+    php="$(find "${dir_path}" -name "index.php" -type f)"
+    if [[ -z ${php} ]]; then
+
+      project_type="php"
+
+    fi
+
+    # Node.js?
+    nodejs="$(find "${dir_path}" -name "package.json" -type f)"
+
+    if [[ -z ${nodejs} ]]; then
+
+      project_type="nodejs"
+
+      # Return
+      echo "${project_type}"
+
+      return 0
+
+    fi
+
+    # html-only?
+    html="$(find "${dir_path}" -name "index.html" -type f)"
+    if [[ -z ${html} ]]; then
+
+      project_type="html"
+
+      # Return
+      echo "${project_type}"
+
+      return 0
+
+    fi
+
+    # docker-compose?
+    docker="$(find "${dir_path}" -name "docker-compose.yml" -type f)"
+    if [[ -z ${docker} ]]; then
+
+      project_type="docker-compose"
+
+      # Return
+      echo "${project_type}"
+
+      return 0
+
+    fi
+
+    # Unknown
+    if [[ -z ${nodejs} ]]; then
+
+      project_type="unknown"
+
+      # Return
+      echo "${project_type}"
+
+      return 0
+
+    fi
+
+  else
+
+    return 1
+
+  fi
 
 }
 
