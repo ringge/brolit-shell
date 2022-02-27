@@ -129,8 +129,8 @@ function restore_backup_from_local_file() {
 
         # TODO: search for .sql or sql.gz files
 
-        # We don't have a domain yet so let "restore_site_files" ask
-        restore_site_files ""
+        # We don't have a domain yet so let "restore_backup_files" ask
+        restore_backup_files ""
 
         # TODO: restore_type_selection_from_dropbox needs a refactor too
 
@@ -835,7 +835,7 @@ function restore_letsencrypt_site_files() {
 
 # TODO: refactor to accept domain, backup_file, path_to_restore
 
-function restore_site_files() {
+function restore_backup_files() {
 
   local domain=$1
   #local backup_path=$2
@@ -866,10 +866,10 @@ function restore_site_files() {
     fi
 
     # Ask folder to install
-    folder_to_install="$(ask_folder_to_install_sites "${PROJECTS_PATH}")"
+    #folder_to_install="$(ask_folder_to_install_sites "${PROJECTS_PATH}")"
 
     # New destination directory
-    actual_folder="${folder_to_install}/${chosen_domain}"
+    actual_folder="${PROJECTS_PATH}/${chosen_domain}"
 
     # Check if destination folder exist
     if [[ -d ${actual_folder} ]]; then
@@ -880,27 +880,13 @@ function restore_site_files() {
     fi
 
     # Restore files
-    move_files "${project_tmp_new_folder}" "${folder_to_install}"
+    move_files "${project_tmp_new_folder}" "${PROJECTS_PATH}"
 
-    # TODO: we need another aproach for other kind of projects
-    # Search wp-config.php (to find wp installation on sub-folders)
-    install_path="$(wp_config_path "${actual_folder}")"
+    # Change ownership
+    change_ownership "www-data" "www-data" "${actual_folder}"
 
-    log_event "info" "install_path=${install_path}" "false"
-
-    display --indent 8 --text "Restored on: ${install_path}"
-
-    if [[ -d "${install_path}" ]]; then
-
-      log_event "info" "Wordpress intallation found on: ${install_path}" "false"
-      log_event "info" "Files backup restored on: ${install_path}" "false"
-
-      wp_change_permissions "${install_path}"
-
-      # Return
-      echo "${chosen_domain}"
-
-    fi
+    # Return
+    echo "${chosen_domain}"
 
   else
 
@@ -1065,7 +1051,7 @@ function restore_type_selection_from_dropbox() {
             # site
 
             # At this point chosen_project is the new project domain
-            restore_site_files "${chosen_project}"
+            restore_backup_files "${chosen_project}"
 
           fi
 
@@ -1158,7 +1144,7 @@ function restore_project() {
     chosen_domain="${chosen_project}"
 
     # Restore site files
-    new_project_domain="$(restore_site_files "${chosen_domain}")"
+    new_project_domain="$(restore_backup_files "${chosen_domain}")"
 
     # Extract project name from domain
     possible_project_name="$(project_get_name_from_domain "${new_project_domain}")"
@@ -1317,6 +1303,8 @@ function restore_project() {
 
     # Check if is a WP project
     if [[ ${project_type} == "wordpress" ]]; then
+
+      wp_change_permissions "${install_path}"
 
       # Change wp-config.php database parameters
       wp_update_wpconfig "${install_path}" "${db_project_name}" "${project_state}" "${db_pass}"
