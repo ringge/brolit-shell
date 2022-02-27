@@ -1157,6 +1157,9 @@ function restore_project() {
     # Only for better code reading, i assign this new var:
     chosen_domain="${chosen_project}"
 
+    # Restore site files
+    new_project_domain="$(restore_site_files "${chosen_domain}")"
+
     # Extract project name from domain
     possible_project_name="$(project_get_name_from_domain "${new_project_domain}")"
 
@@ -1170,15 +1173,9 @@ function restore_project() {
     # Sanitize ${project_name}
     db_project_name="$(mysql_name_sanitize "${project_name}")"
 
-    # Restore site files
-    new_project_domain="$(restore_site_files "${chosen_domain}")"
-
-    # TODO: Read from /etc/brolit/${project_name}_conf.json if not present call a function to do this:
-
     display --indent 8 --text "Project Type ${project_type}" --tcolor GREEN
 
     # Reading config file
-    # TODO: get database engine (MySQL or Postgres)
     db_engine="$(project_get_configured_database_engine "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
     db_name="$(project_get_configured_database "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
     db_user="$(project_get_configured_database_user "${BROLIT_TMP_DIR}/${chosen_project}" "${project_type}")"
