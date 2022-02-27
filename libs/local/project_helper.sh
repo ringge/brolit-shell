@@ -619,6 +619,77 @@ function project_get_config() {
 }
 
 ################################################################################
+# Get configured database engine
+#
+# Arguments:
+#  $1 = ${project_path}
+#  $2 = ${project_type}
+#
+# Outputs:
+#   ${db_engine} if ok, 1 on error.
+################################################################################
+
+function project_get_configured_database_engine() {
+
+  local project_path=$1
+  local project_type=$2
+
+  # First try to read from brolit project config
+  db_engine="$(project_get_config "${project_path}" "project[].database[].engine")"
+
+  if [[ -z ${db_engine} ]]; then
+
+    case ${project_type} in
+
+    wordpress)
+
+      # Return
+      echo "mysql"
+
+      ;;
+
+    laravel)
+
+      # Read "${project_path}"/.env to extract DB_CONNECTION
+      db_name="$(grep -oP '^DB_CONNECTION=\K.*' "${project_path}"/.env)"
+
+      log_event "debug" "Extracted DB_CONNECTION : ${db_name}" "false"
+
+      # Return
+      echo "${db_name}"
+
+      ;;
+
+    node-js)
+
+      # Read "${project_path}"/.env to extract DB_CONNECTION
+      db_name="$(grep -oP '^DB_CONNECTION=\K.*' "${project_path}"/.env)"
+
+      log_event "debug" "Extracted DB_CONNECTION : ${db_name}" "false"
+
+      # Return
+      echo "${db_name}"
+
+      ;;
+
+    *)
+
+      display --indent 8 --text "Project Type Unknown" --tcolor RED
+      return 1
+
+      ;;
+
+    esac
+
+  else
+
+    echo "${db_engine}"
+
+  fi
+
+}
+
+################################################################################
 # Get configured database
 #
 # Arguments:
@@ -667,7 +738,7 @@ function project_get_configured_database() {
 
     laravel)
 
-      # Read "${project_path}"/.env to extract DB_USER
+      # Read "${project_path}"/.env to extract DB_DATABASE
       db_name="$(grep -oP '^DB_DATABASE=\K.*' "${project_path}"/.env)"
 
       log_event "debug" "Extracted db_name : ${db_name}" "false"
@@ -679,7 +750,7 @@ function project_get_configured_database() {
 
     node-js)
 
-      # Read "${project_path}"/.env to extract DB_USER
+      # Read "${project_path}"/.env to extract DB_NAME
       db_name="$(grep -oP '^DB_NAME=\K.*' "${project_path}"/.env)"
 
       log_event "debug" "Extracted db_name : ${db_name}" "false"

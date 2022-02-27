@@ -48,6 +48,7 @@
 
 ## For release 3.3
 
+- [ ] Core: Create warning if multiple WP installation found on backup to restore.
 - [ ] Core: IPv6 support for nginx, certbot and cloudflare helpers.
 - [ ] Core: Implementation of brolit_project.js (to read and deploy).
 - [ ] Core: composer support.
