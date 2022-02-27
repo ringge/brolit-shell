@@ -1399,14 +1399,11 @@ function project_get_type() {
 
     # WP?
     wp_config_path "${dir_path}"
-
     exitstatus=$?
     if [[ ${exitstatus} -eq 0 ]]; then
 
-      project_type="wordpress"
-
       # Return
-      echo "${project_type}"
+      echo "wordpress"
 
       return 0
 
@@ -1414,13 +1411,10 @@ function project_get_type() {
 
     # Laravel?
     laravel_v="$(php "${project_dir}/artisan" --version | grep -oE "Laravel Framework [0-9]+\.[0-9]+\.[0-9]+")"
-
-    if [[ -z ${laravel_v} ]]; then
-
-      project_type="laravel"
+    if [[ -n ${laravel_v} ]]; then
 
       # Return
-      echo "${project_type}"
+      echo "laravel"
 
       return 0
 
@@ -1428,21 +1422,21 @@ function project_get_type() {
 
     # other-php?
     php="$(find "${dir_path}" -name "index.php" -type f)"
-    if [[ -z ${php} ]]; then
+    if [[ -n ${php} ]]; then
 
-      project_type="php"
+      # Return
+      echo "php"
+
+      return 0
 
     fi
 
     # Node.js?
     nodejs="$(find "${dir_path}" -name "package.json" -type f)"
-
-    if [[ -z ${nodejs} ]]; then
-
-      project_type="nodejs"
+    if [[ -n ${nodejs} ]]; then
 
       # Return
-      echo "${project_type}"
+      echo "nodejs"
 
       return 0
 
@@ -1450,12 +1444,10 @@ function project_get_type() {
 
     # html-only?
     html="$(find "${dir_path}" -name "index.html" -type f)"
-    if [[ -z ${html} ]]; then
-
-      project_type="html"
+    if [[ -n ${html} ]]; then
 
       # Return
-      echo "${project_type}"
+      echo "html"
 
       return 0
 
@@ -1463,28 +1455,22 @@ function project_get_type() {
 
     # docker-compose?
     docker="$(find "${dir_path}" -name "docker-compose.yml" -type f)"
-    if [[ -z ${docker} ]]; then
-
-      project_type="docker-compose"
+    if [[ -n ${docker} ]]; then
 
       # Return
-      echo "${project_type}"
+      echo "docker-compose"
 
       return 0
 
     fi
 
     # Unknown
-    if [[ -z ${nodejs} ]]; then
+    # if reach this point, it's not a project?
 
-      project_type="unknown"
+    # Return
+    echo "unknown"
 
-      # Return
-      echo "${project_type}"
-
-      return 0
-
-    fi
+    return 0
 
   else
 
