@@ -187,7 +187,7 @@ function restore_manager_menu() {
 
   restore_options=(
     "01)" "FROM DROPBOX"
-    "02)" "FROM PUBLIC LINK (BETA)"
+    "02)" "FROM PUBLIC LINK"
     "03)" "FROM LOCAL FILE (BETA)"
     "04)" "FROM FTP (BETA)"
   )

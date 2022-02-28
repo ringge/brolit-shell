@@ -109,7 +109,7 @@ function restore_backup_from_local_file() {
         project_domain="$(ask_project_domain "")"
 
         # Decompress backup
-        mkdir "${BROLIT_TMP_DIR}/${project_domain}"
+        mkdir -p "${BROLIT_TMP_DIR}/${project_domain}"
         decompress "${filename}" "${BROLIT_TMP_DIR}/${project_domain}" "lbzip2"
 
         dir_count="$(count_directories_on_directory "${BROLIT_TMP_DIR}/${project_domain}")"
@@ -276,21 +276,33 @@ function restore_backup_from_ftp() {
 #   0 if ok, 1 on error.
 ################################################################################
 
-# TODO: need refactor
 function restore_backup_from_public_url() {
 
-  # Project details
+  local project_state
+  local project_domain
+  local project_name
+  local possible_project_name
+  local root_domain
+  local possible_root_domain
+
+  # RESTORE FILES
+  log_subsection "Restore files from public URL"
+
+  # Ask project state
+  project_state="$(ask_project_state "prod")"
+
+  # Project domain
   project_domain="$(ask_project_domain "")"
 
-  possible_root_domain="$(get_root_domain "${project_domain}")"
+  # Cloudflare support
+  if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
+    possible_root_domain="$(get_root_domain "${project_domain}")"
+    root_domain="$(cloudflare_ask_rootdomain "${possible_root_domain}")"
+  fi
 
-  root_domain="$(cloudflare_ask_rootdomain "${possible_root_domain}")"
-
+  # Project name
   possible_project_name="$(project_get_name_from_domain "${project_domain}")"
-
   project_name="$(ask_project_name "${possible_project_name}")"
-
-  project_state="$(ask_project_state "")"
 
   source_files_url=$(whiptail --title "Source File URL" --inputbox "Please insert the URL where backup files are stored." 10 60 "https://domain.com/backup-files.zip" 3>&1 1>&2 2>&3)
   exitstatus=$?
@@ -306,20 +318,20 @@ function restore_backup_from_public_url() {
 
   folder_to_install="$(ask_folder_to_install_sites "${PROJECTS_PATH}")"
 
-  log_event "debug" "Creating tmp directories" "false"
-  mkdir "${BROLIT_TMP_DIR}"
-  mkdir "${BROLIT_TMP_DIR}/${project_domain}"
-  cd "${BROLIT_TMP_DIR}/${project_domain}"
+  mkdir -p "${BROLIT_TMP_DIR}"
+  mkdir -p "${BROLIT_TMP_DIR}/${project_domain}"
 
   # File Backup details
-  bk_f_file=${source_files_url##*/}
+  backup_file=${source_files_url##*/}
 
   # Log
   log_event "info" "Downloading file backup ${source_files_url}" "true"
   log_event "debug" "Running: wget ${source_files_url}" "false"
 
   # Download File Backup
-  wget "${source_files_url}"
+  #cd "${BROLIT_TMP_DIR}/${project_domain}"
+  #wget --quiet "${source_files_url}"
+  curl --silent -L "${source_files_url}" >"${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
   exitstatus=$?
   if [[ ${exitstatus} -eq 1 ]]; then
@@ -333,8 +345,14 @@ function restore_backup_from_public_url() {
   fi
 
   # Uncompressing
-  log_event "info" "Uncompressing file backup: ${bk_f_file}" "true"
-  decompress "${bk_f_file}"
+  log_event "info" "Uncompressing file backup: ${backup_file}" "true"
+  decompress "${backup_file}"
+
+  # Move to ${PROJECTS_PATH}
+  log_event "info" "Moving ${project_domain} to ${PROJECTS_PATH} ..." "false"
+  mv "${BROLIT_MAIN_DIR}/tmp/${project_domain}" "${PROJECTS_PATH}/${project_domain}"
+
+  change_ownership "www-data" "www-data" "${PROJECTS_PATH}/${project_domain}"
 
   # Create database and user
   db_project_name=$(mysql_name_sanitize "${project_name}")
@@ -378,41 +396,33 @@ function restore_backup_from_public_url() {
 
     fi
 
-  fi
+  else
 
-  # Move to ${folder_to_install}
-  log_event "info" "Moving ${project_domain} to ${folder_to_install} ..." "false"
-  mv "${BROLIT_MAIN_DIR}/tmp/${project_domain}" "${folder_to_install}/${project_domain}"
+    log_event "info" "No database backups found on downloaded files" "false"
 
-  change_ownership "www-data" "www-data" "${folder_to_install}/${project_domain}"
+    source_db_url=$(whiptail --title "Database URL" --inputbox "Please insert the URL where the database backup is stored." 10 60 "https://domain.com/backup-db.zip" 3>&1 1>&2 2>&3)
+    exitstatus=$?
+    if [[ ${exitstatus} -eq 0 ]]; then
 
-  actual_folder="${folder_to_install}/${project_domain}"
+      # Download database backup
+      curl --silent -L "${source_db_url}" >"${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
-  install_path="$(wp_config_path "${actual_folder}")"
-  if [[ -z "${install_path}" ]]; then
-
-    log_event "info" "WordPress installation found" "false"
-
-    # Change file and dir permissions
-    wp_change_permissions "${actual_folder}/${install_path}"
-
-    # Change wp-config.php database parameters
-    if [[ -z "${DB_PASS}" ]]; then
-      wp_update_wpconfig "${actual_folder}/${install_path}" "${project_name}" "${project_state}" ""
+      # Restore database
+      restore_database_backup "${project_name}" "${project_state}" "${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
     else
-      wp_update_wpconfig "${actual_folder}/${install_path}" "${project_name}" "${project_state}" "${DB_PASS}"
+      return 1
 
     fi
 
   fi
 
+  actual_folder="${PROJECTS_PATH}/${project_domain}"
+
   # Create nginx config files for site
   nginx_server_create "${project_domain}" "wordpress" "single"
 
-  # Get server IP
-  #IP=$(dig +short myip.opendns.com @resolver1.opendns.com) 2>/dev/null
-
+  # Change DNS record
   if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
 
     # TODO: Ask for subdomains to change in Cloudflare (root domain asked before)
@@ -426,8 +436,30 @@ function restore_backup_from_public_url() {
   # HTTPS with Certbot
   certbot_helper_installer_menu "${NOTIFICATION_EMAIL_MAILA}" "${project_domain}"
 
-  # WP Search and Replace URL
-  wp_ask_url_search_and_replace
+  project_type="$(project_get_type "${actual_folder}")"
+
+  if [[ ${project_type} == "wordpress" ]]; then
+
+    install_path="$(wp_config_path "${actual_folder}")"
+    if [[ -z "${install_path}" ]]; then
+
+      log_event "info" "WordPress installation found" "false"
+
+      # Change file and dir permissions
+      wp_change_permissions "${actual_folder}/${install_path}"
+
+      # Change wp-config.php database parameters
+      wp_update_wpconfig "${actual_folder}/${install_path}" "${project_name}" "${project_state}" "${database_user_passw}"
+
+      # WP Search and Replace URL
+      wp_ask_url_search_and_replace "${actual_folder}/${install_path}"
+
+    fi
+
+  fi
+
+  # Create brolit_config.json file
+  project_create_config "${actual_folder}/${install_path}" "${project_name}" "${project_state}" "${project_type}" "enabled" "mysql" "${database_name}" "localhost" "${database_user}" "${database_user_passw}" "${project_domain}" "" "" "true" ""
 
   # Remove tmp files
   log_event "info" "Removing downloaded files ..." "false"
@@ -438,7 +470,7 @@ function restore_backup_from_public_url() {
 
   HTMLOPEN='<html><body>'
   BODY_SRV_MIG='Migración finalizada en '${ELAPSED_TIME}'<br/>'
-  BODY_DB='Database: '${project_name}'_'${project_state}'<br/>Database User: '${project_name}'_user <br/>Database User Pass: '${DB_PASS}'<br/>'
+  BODY_DB='Database: '${project_name}'_'${project_state}'<br/>Database User: '${project_name}'_user <br/>Database User Pass: '${database_user_passw}'<br/>'
   HTMLCLOSE='</body></html>'
 
   mail_send_notification "✅ ${VPSNAME} - Project ${project_name} restored!" "${HTMLOPEN} ${BODY_SRV_MIG} ${BODY_DB} ${BODY_CLF} ${HTMLCLOSE}"

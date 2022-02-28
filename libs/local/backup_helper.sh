@@ -934,8 +934,10 @@ function backup_project() {
 
     else
 
+      # Log
       log_event "info" "Database ${db_name} not found" "false"
-      display --indent 6 --text "Database ${db_name} not found" --tcolor YELLOW
+      display --indent 6 --text "Database backup" --result "SKIPPED" --color YELLOW
+      display --indent 8 --text "Database ${db_name} not found" --tcolor YELLOW
 
     fi
 
