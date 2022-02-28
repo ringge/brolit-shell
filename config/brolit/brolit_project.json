@@ -1,10 +1,16 @@
 {
-    "brolit_project_config_version": "1.3",
+    "brolit_project_config_version": "1.3.2",
     "project": [
         {
             "name": "",
             "stage": "",
             "type": "",
+            "primary_subdomain": "",
+            "secondary_subdomains": [],
+            "override_nginx_conf": "",
+            "use_hhtp2": "",
+            "ipv6_support": "",
+            "certbot_mode": "",
             "files": [
                 {
                     "status": "disabled",
@@ -31,13 +37,7 @@
                         }
                     ]
                 }
-            ],
-            "primary_subdomain": "",
-            "secondary_subdomains": [],
-            "override_nginx_conf": "",
-            "use_hhtp2": "",
-            "ipv6_support": "",
-            "certbot_mode": ""
+            ]
         }
     ],
     "cloudflare": [

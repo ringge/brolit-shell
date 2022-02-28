@@ -328,9 +328,6 @@ function project_create_config() {
   # Write config file
   ## Doc: https://stackoverflow.com/a/61049639/2267761
 
-  ## project path
-  json_write_field "${project_config_file}" "project[].path" "${project_path}"
-
   ## project name
   json_write_field "${project_config_file}" "project[].name" "${project_name}"
 
@@ -339,6 +336,9 @@ function project_create_config() {
 
   ## project type
   json_write_field "${project_config_file}" "project[].type" "${project_type}"
+
+  ## project files path
+  json_write_field "${project_config_file}" "project[].files[],config[].path" "${project_path}"
 
   ## project database status
   json_write_field "${project_config_file}" "project[].database[].status" "${project_db_status}"

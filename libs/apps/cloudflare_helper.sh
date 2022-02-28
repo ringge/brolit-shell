@@ -374,7 +374,6 @@ function cloudflare_record_exists() {
 
     log_event "debug" "Last command executed: curl -s -X GET \"https://api.cloudflare.com/client/v4/zones/${zone_id}/dns_records?name=${record_name}\" -H \"X-Auth-Email: ${SUPPORT_CLOUDFLARE_EMAIL}\" -H \"X-Auth-Key: ${SUPPORT_CLOUDFLARE_API_KEY}\" -H \"Content-Type: application/json\" | grep -Po '(?<=\"id\":\")[^\"]*'"
 
-    exitstatus=$?
     if [[ ${record_id} == "" ]]; then
 
         log_event "info" "Record ${record_name} not found on Cloudflare"
