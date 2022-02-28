@@ -925,8 +925,19 @@ function backup_project() {
     fi
 
     # TODO: check database engine
-    # Backup database
-    backup_project_database "${db_name}" "mysql"
+    mysql_database_exists "${db_name}"
+    exitstatus=$?
+    if [[ ${exitstatus} -eq 0 ]]; then
+
+      # Backup database
+      backup_project_database "${db_name}" "mysql"
+
+    else
+
+      log_event "info" "Database ${db_name} not found" "false"
+      display --indent 6 --text "Database ${db_name} not found" --tcolor YELLOW
+
+    fi
 
     log_event "info" "Deleting backup from server ..." "false"
 
