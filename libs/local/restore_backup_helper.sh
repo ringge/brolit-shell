@@ -325,8 +325,10 @@ function restore_backup_from_public_url() {
   backup_file=${source_files_url##*/}
 
   # Log
-  log_event "info" "Downloading file backup ${source_files_url}" "true"
-  log_event "debug" "Running: wget ${source_files_url}" "false"
+  display --indent 6 --text "- Downloading file backup"
+
+  log_event "info" "Downloading file backup ${source_files_url}" "false"
+  log_event "debug" "Running: curl --silent -L ${source_files_url} >${BROLIT_TMP_DIR}/${project_domain}/${backup_file}" "false"
 
   # Download File Backup
   #cd "${BROLIT_TMP_DIR}/${project_domain}"
@@ -334,11 +336,16 @@ function restore_backup_from_public_url() {
   curl --silent -L "${source_files_url}" >"${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
   exitstatus=$?
-  if [[ ${exitstatus} -eq 1 ]]; then
+  if [[ ${exitstatus} -eq 0 ]]; then
+
+    # Log
+    display --indent 6 --text "- Downloading file backup" --result "DONE" --color GREEN
+
+  else
 
     # Log
     log_event "error" "Download failed!" "false"
-    display --indent 6 --text "- Restore project" --result "FAIL" --color RED
+    display --indent 6 --text "- Downloading file backup" --result "FAIL" --color RED
 
     return 1
 
@@ -404,11 +411,14 @@ function restore_backup_from_public_url() {
     exitstatus=$?
     if [[ ${exitstatus} -eq 0 ]]; then
 
+      # Database Backup details
+      backup_file=${source_db_url##*/}
+
       # Download database backup
       curl --silent -L "${source_db_url}" >"${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
       # Restore database
-      restore_database_backup "${project_name}" "${project_state}" "${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
+      restore_database_backup "${project_name}" "${project_state}" "${backup_file}"
 
     else
       return 1

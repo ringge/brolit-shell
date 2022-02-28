@@ -846,7 +846,7 @@ function mysql_database_import() {
     # Execute command
     pv --width 70 "${dump_file}" | ${MYSQL_ROOT} -f -D "${database}"
 
-    # Check result
+    # TODO: sometimes return 0 but the import is not successful.
     import_status=$?
     if [[ ${import_status} -eq 0 ]]; then
 
