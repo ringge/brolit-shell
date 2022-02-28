@@ -893,7 +893,7 @@ function backup_project() {
   local project_config_file
 
   # Backup files
-  backup_project_files "site" "${PROJECTS_PATH}" "${project_domain}"
+  backup_file_size="$(backup_project_files "site" "${PROJECTS_PATH}" "${project_domain}")"
 
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then

@@ -1072,8 +1072,8 @@ function project_delete_files() {
 
   BK_TYPE="site"
 
-  # Making a backup of project files
-  backup_project_files "${BK_TYPE}" "${PROJECTS_PATH}" "${project_domain}"
+  # Backup files
+  backup_file_size="$(backup_project_files "${BK_TYPE}" "${PROJECTS_PATH}" "${project_domain}")"
 
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
