@@ -1256,7 +1256,6 @@ function decompress() {
 
   # Get filename and file extension
   filename=$(basename -- "${file_path}")
-  #file_extension="${filename##*.}"
   filename="${filename%.*}"
 
   # Log
@@ -1345,6 +1344,7 @@ function decompress() {
 
     # Log
     log_event "error" "${file_path} is not a valid file" "false"
+    clear_previous_lines "1"
     display --indent 6 --text "- Extracting compressed file" --result "FAIL" --color RED
     display --indent 8 --text "${file_path} is not a valid file" --tcolor RED
     return 1

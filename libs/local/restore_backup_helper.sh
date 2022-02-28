@@ -308,8 +308,7 @@ function restore_backup_from_public_url() {
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
-    # Return
-    echo "${source_files_url}"
+    display --indent 6 --text "${source_files_url}"
 
   else
     return 1
@@ -349,8 +348,18 @@ function restore_backup_from_public_url() {
   fi
 
   # Uncompressing
-  log_event "info" "Uncompressing file backup: ${backup_file}" "true"
   decompress "${BROLIT_TMP_DIR}/${project_domain}/${backup_file}" "${BROLIT_TMP_DIR}" "lbzip2"
+
+  exitstatus=$?
+  if [[ ${exitstatus} -eq 1 ]]; then
+
+    # Log
+    log_event "error" "Restore project aborted." "false"
+    display --indent 8 --text "Restore project aborted"--tcolor RED
+
+    return 1
+
+  fi
 
   # Move to ${PROJECTS_PATH}
   log_event "info" "Moving ${project_domain} to ${PROJECTS_PATH} ..." "false"
