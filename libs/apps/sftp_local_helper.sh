@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha7
+# Version: 3.2-alpha8
 #############################################################################
 #
 # SFTP Local Helper: Local sftp configuration functions
@@ -27,14 +27,14 @@ function _sftp_add_folder_permission() {
     local folder=$3
 
     # Create user subfolder
-    mkdir "/home/${username}/${folder}"
+    mkdir -p "/home/${username}/${folder}"
 
     # Log
     display --indent 6 --text "- Creating user subfolder" --result "DONE" --color GREEN
     log_event "info" "Creating user subfolder: /home/${username}/${folder}" "false"
 
     # Create project subfolder
-    mkdir "${dir_path}/${folder}"
+    mkdir -p "${dir_path}/${folder}"
     log_event "info" "Creating subfolder ${dir_path}/${folder}" "false"
 
     # Mounting

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha7
+# Version: 3.2-alpha8
 ################################################################################
 #
 # Certbot Helper: Certbot functions.
@@ -513,9 +513,10 @@ function certbot_certificate_delete() {
     else
 
       # Log
+      clear_previous_lines "1"
       log_event "error" "Running: certbot delete --cert-name ${domains}" "false"
       display --indent 6 --text "- Deleting certificate for ${domains}" --result "FAIL" --color RED
-      display --indent 8 --text "Please read the log file" --tcolor RED
+      display --indent 8 --text "No certificate found" --tcolor RED
 
       return 1
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha7
+# Version: 3.2-alpha8
 ################################################################################
 #
 # Backup/Restore Helper: Backup and restore funtions.
@@ -316,29 +316,26 @@ function restore_backup_from_public_url() {
 
   fi
 
-  folder_to_install="$(ask_folder_to_install_sites "${PROJECTS_PATH}")"
-
-  mkdir -p "${BROLIT_TMP_DIR}"
-  mkdir -p "${BROLIT_TMP_DIR}/${project_domain}"
-
   # File Backup details
   backup_file=${source_files_url##*/}
 
   # Log
   display --indent 6 --text "- Downloading file backup"
-
   log_event "info" "Downloading file backup ${source_files_url}" "false"
   log_event "debug" "Running: curl --silent -L ${source_files_url} >${BROLIT_TMP_DIR}/${project_domain}/${backup_file}" "false"
 
+  # Create tmp dir structure
+  mkdir -p "${BROLIT_TMP_DIR}"
+  mkdir -p "${BROLIT_TMP_DIR}/${project_domain}"
+
   # Download File Backup
-  #cd "${BROLIT_TMP_DIR}/${project_domain}"
-  #wget --quiet "${source_files_url}"
   curl --silent -L "${source_files_url}" >"${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
     # Log
+    clear_previous_lines "1"
     display --indent 6 --text "- Downloading file backup" --result "DONE" --color GREEN
 
   else
@@ -578,7 +575,7 @@ function restore_database_backup() {
 
     # Create temporary folder for backups
     if [[ ! -d "${BROLIT_TMP_DIR}/backups" ]]; then
-      mkdir "${BROLIT_TMP_DIR}/backups"
+      mkdir -p "${BROLIT_TMP_DIR}/backups"
       log_event "info" "Temp files directory created: ${BROLIT_TMP_DIR}/backups" "false"
     fi
 
@@ -645,20 +642,21 @@ function restore_config_files_from_dropbox() {
   exitstatus=$?
   if [[ ${exitstatus} -eq 0 ]]; then
 
-    cd "${BROLIT_MAIN_DIR}/tmp"
+    #cd "${BROLIT_MAIN_DIR}/tmp"
 
     # Downloading Config Backup
     display --indent 6 --text "- Downloading config backup from dropbox"
 
-    dropbox_output="$(${DROPBOX_UPLOADER} download "${dropbox_chosen_type_path}/${chosen_config_type}/${chosen_config_bk}" 1>&2)"
+    dropbox_download "${dropbox_chosen_type_path}/${chosen_config_type}/${chosen_config_bk}" "${BROLIT_MAIN_DIR}/tmp"
+    #dropbox_output="$(${DROPBOX_UPLOADER} download "${dropbox_chosen_type_path}/${chosen_config_type}/${chosen_config_bk}" 1>&2)"
 
     clear_previous_lines "1"
     display --indent 6 --text "- Downloading config backup from dropbox" --result "DONE" --color GREEN
 
     # Restore files
-    mkdir "${chosen_config_type}"
+    mkdir -p "${chosen_config_type}"
     mv "${chosen_config_bk}" "${chosen_config_type}"
-    cd "${chosen_config_type}"
+    #cd "${chosen_config_type}"
 
     # Decompress
     decompress "${chosen_config_bk}" "${BROLIT_MAIN_DIR}/tmp/${chosen_config_type}" "lbzip2"
@@ -731,7 +729,7 @@ function restore_nginx_site_files() {
   display --indent 6 --text "- Downloading nginx backup from dropbox" --result "DONE" --color GREEN
 
   # Extract tar.bz2 with lbzip2
-  mkdir "${BROLIT_MAIN_DIR}/tmp/nginx"
+  mkdir -p "${BROLIT_MAIN_DIR}/tmp/nginx"
   decompress "${bk_file}" "${BROLIT_MAIN_DIR}/tmp/nginx" "lbzip2"
 
   # TODO: if nginx is installed, ask if nginx.conf must be replace

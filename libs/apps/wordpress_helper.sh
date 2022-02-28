@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha7
+# Version: 3.2-alpha8
 ################################################################################
 #
 # WordPress Helper: Perform wordpress actions.
@@ -313,7 +313,7 @@ function wp_ask_url_search_and_replace() {
 
           # Create temporary folder for backups
           if [[ ! -d "${BROLIT_TMP_DIR}/backups" ]]; then
-            mkdir "${BROLIT_TMP_DIR}/backups"
+            mkdir -p "${BROLIT_TMP_DIR}/backups"
             log_event "info" "Temp files directory created: ${BROLIT_TMP_DIR}/backups" "false"
           fi
 

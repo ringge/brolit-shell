@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha7
+# Version: 3.2-alpha8
 #############################################################################
 #
 # Backup Helper: Perform backup actions.
@@ -449,7 +449,7 @@ function backup_all_files() {
 
       log_event "info" "Folder ${MAILCOW_TMP_BK} doesn't exist. Creating now ..." "false"
 
-      mkdir "${MAILCOW_TMP_BK}"
+      mkdir -p "${MAILCOW_TMP_BK}"
 
     fi
 

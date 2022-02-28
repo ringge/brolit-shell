@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Author: BROOBE - A Software Development Agency - https://broobe.com
-# Version: 3.2-alpha7
+# Version: 3.2-alpha8
 ################################################################################
 #
 # Project Helper: Perform project actions.
@@ -1507,9 +1507,9 @@ function php_project_installer() {
   log_subsection "PHP Project Install"
 
   if [[ ! -d ${project_path} ]]; then
-    # Download WP
-    mkdir "${project_path}"
-    change_ownership "www-data" "www-data" "${project_path}"
+
+    # Create project directory
+    mkdir -p "${project_path}"
 
     # Log
     #display --indent 6 --text "- Making a copy of the WordPress project" --result "DONE" --color GREEN
@@ -1535,9 +1535,6 @@ function php_project_installer() {
   mysql_database_create "${database_name}"
   mysql_user_create "${database_user}" "${database_user_passw}" ""
   mysql_user_grant_privileges "${database_user}" "${database_name}" ""
-
-  # Create project directory
-  mkdir "${project_path}"
 
   # Create index.php
   echo "<?php phpinfo(); ?>" >"${project_path}/index.php"
@@ -1699,8 +1696,9 @@ function nodejs_project_installer() {
   fi
 
   if [[ ! -d "${project_path}" ]]; then
-    # Download WP
-    mkdir "${project_path}"
+
+    # Create project directory
+    mkdir -p "${project_path}"
     change_ownership "www-data" "www-data" "${project_path}"
 
   else
@@ -1725,9 +1723,6 @@ function nodejs_project_installer() {
   mysql_database_create "${database_name}"
   mysql_user_create "${database_user}" "${database_user_passw}" ""
   mysql_user_grant_privileges "${database_user}" "${database_name}"
-
-  # Create project directory
-  mkdir "${project_path}"
 
   # Create index.html
   echo "Please configure the project and remove this file." >"${project_path}/index.html"
