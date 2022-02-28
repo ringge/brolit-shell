@@ -834,16 +834,13 @@ function backup_project_database() {
       # Log
       display --indent 8 --text "Final backup size: ${YELLOW}${backup_file_size}${ENDCOLOR}"
 
-      # Extract parameters from ${backup_file}
-      database_backup_path="$(echo "${backup_file}" | cut -d ";" -f 1)"
-
       # Create dir structure
       storage_create_dir "/${VPSNAME}/projects-online"
       storage_create_dir "/${VPSNAME}/projects-online/database"
       storage_create_dir "/${VPSNAME}/projects-online/database/${database}"
 
       # Upload database backup
-      storage_upload_backup "${database_backup_path}" "/${VPSNAME}/projects-online/database/${database}"
+      storage_upload_backup "${BROLIT_TMP_DIR}/${NOW}/${backup_file}" "/${VPSNAME}/projects-online/database/${database}"
 
       upload_result=$?
       if [[ ${upload_result} -eq 0 ]]; then

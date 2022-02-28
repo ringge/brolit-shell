@@ -592,8 +592,6 @@ function project_get_config() {
   local config_field=$2
 
   local config_value
-  local project_domain
-  local project_name
   local project_config_file
 
   project_config_file="$(project_get_brolit_config_file "${project_path}")"
@@ -608,9 +606,6 @@ function project_get_config() {
     return 0
 
   else
-
-    # Return
-    echo "false"
 
     return 1
 
@@ -793,14 +788,12 @@ function project_get_configured_database_user() {
   # First try to read from brolit project config
   db_user="$(project_get_config "${project_path}" "project[].database[].config[].user")"
 
-  if [[ ${db_user} != "" ]]; then
+  if [[ -n ${db_user} ]]; then
 
     log_event "debug" "Extracted db_name : ${db_user}" "false"
 
     # Return
     echo "${db_user}"
-
-    return 0
 
   else
 
@@ -849,6 +842,8 @@ function project_get_configured_database_user() {
     esac
 
   fi
+
+  return 0
 
 }
 
@@ -1193,7 +1188,7 @@ function project_delete_database() {
     # Delete mysql user
     while true; do
 
-      echo -e "${B_RED}${ITALIC} > Do you want to remove database user? Maybe is used by another project.${ENDCOLOR}"
+      echo -e "${B_RED}${ITALIC} > Remove database user: ${database_user}? Maybe is used by another project.${ENDCOLOR}"
       read -p "Please type 'y' or 'n'" yn
 
       case $yn in
