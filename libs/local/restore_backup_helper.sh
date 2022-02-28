@@ -350,7 +350,7 @@ function restore_backup_from_public_url() {
 
   # Uncompressing
   log_event "info" "Uncompressing file backup: ${backup_file}" "true"
-  decompress "${backup_file}"
+  decompress "${BROLIT_TMP_DIR}/${project_domain}/${backup_file}" "${BROLIT_TMP_DIR}" "lbzip2"
 
   # Move to ${PROJECTS_PATH}
   log_event "info" "Moving ${project_domain} to ${PROJECTS_PATH} ..." "false"
