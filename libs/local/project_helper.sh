@@ -1389,9 +1389,8 @@ function project_get_type() {
   if [[ ${dir_path} != "" ]]; then
 
     # WP?
-    wp_config_path "${dir_path}"
-    exitstatus=$?
-    if [[ ${exitstatus} -eq 0 ]]; then
+    wp_path="$(wp_config_path "${dir_path}")"
+    if [[ -n ${wp_path} ]]; then
 
       # Return
       echo "wordpress"

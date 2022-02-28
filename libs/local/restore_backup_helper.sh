@@ -361,9 +361,8 @@ function restore_backup_from_public_url() {
 
   fi
 
-  # Move to ${PROJECTS_PATH}
-  log_event "info" "Moving ${project_domain} to ${PROJECTS_PATH} ..." "false"
-  mv "${BROLIT_MAIN_DIR}/tmp/${project_domain}" "${PROJECTS_PATH}/${project_domain}"
+  # Remove downloaded file
+  rm --force "${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
   change_ownership "www-data" "www-data" "${PROJECTS_PATH}/${project_domain}"
 
@@ -433,6 +432,10 @@ function restore_backup_from_public_url() {
 
   fi
 
+  # Move to ${PROJECTS_PATH}
+  log_event "info" "Moving ${project_domain} to ${PROJECTS_PATH} ..." "false"
+  mv "${BROLIT_TMP_DIR}/${project_domain}" "${PROJECTS_PATH}/${project_domain}"
+
   actual_folder="${PROJECTS_PATH}/${project_domain}"
 
   # Create nginx config files for site
@@ -478,8 +481,8 @@ function restore_backup_from_public_url() {
   project_create_config "${actual_folder}/${install_path}" "${project_name}" "${project_state}" "${project_type}" "enabled" "mysql" "${database_name}" "localhost" "${database_user}" "${database_user_passw}" "${project_domain}" "" "" "true" ""
 
   # Remove tmp files
-  log_event "info" "Removing downloaded files ..." "false"
-  rm -r "${BROLIT_MAIN_DIR}/tmp/${project_domain}"
+  log_event "info" "Removing temporary folders ..." "false"
+  rm --force --recursive "${BROLIT_TMP_DIR}/${project_domain:?}"
 
   # Send notifications
   send_notification "✅ ${VPSNAME}" "Project ${project_name} restored!"
