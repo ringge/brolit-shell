@@ -296,8 +296,9 @@ function restore_backup_from_public_url() {
 
   # Cloudflare support
   if [[ ${SUPPORT_CLOUDFLARE_STATUS} == "enabled" ]]; then
-    possible_root_domain="$(get_root_domain "${project_domain}")"
-    root_domain="$(cloudflare_ask_rootdomain "${possible_root_domain}")"
+    #possible_root_domain="$(get_root_domain "${project_domain}")"
+    #root_domain="$(cloudflare_ask_rootdomain "${possible_root_domain}")"
+    root_domain="$(get_root_domain "${project_domain}")"
   fi
 
   # Project name
