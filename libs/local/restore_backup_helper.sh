@@ -365,8 +365,6 @@ function restore_backup_from_public_url() {
   # Remove downloaded file
   rm --force "${BROLIT_TMP_DIR}/${project_domain}/${backup_file}"
 
-  change_ownership "www-data" "www-data" "${PROJECTS_PATH}/${project_domain}"
-
   # Create database and user
   db_project_name=$(mysql_name_sanitize "${project_name}")
 
@@ -436,6 +434,8 @@ function restore_backup_from_public_url() {
   # Move to ${PROJECTS_PATH}
   log_event "info" "Moving ${project_domain} to ${PROJECTS_PATH} ..." "false"
   mv "${BROLIT_TMP_DIR}/${project_domain}" "${PROJECTS_PATH}/${project_domain}"
+
+  change_ownership "www-data" "www-data" "${PROJECTS_PATH}/${project_domain}"
 
   actual_folder="${PROJECTS_PATH}/${project_domain}"
 
